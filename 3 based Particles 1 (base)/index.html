@@ -1,0 +1,2453 @@
+
+<!-- saved from url=(0078)https://prohibition.art/api/creator/projects/cln9gnn6p0000l50foqddkeao/preview -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+
+    <script src="./Tone.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <style type="text/css">
+      html {
+        height: 100%;
+      }
+      body {
+        min-width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      canvas {
+        padding: 0;
+        margin: auto;
+        display: block;
+        position: relative;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+    </style>
+  <link rel="stylesheet" type="text/css" href="chrome-extension://fleenceagaplaefnklabikkmocalkcpo/content-script/assets/fonts/webfonts.css"><style type="text/css">
+@font-face {
+  font-weight: 400;
+  font-style:  normal;
+  font-family: circular;
+
+  src: url('chrome-extension://liecbddmkiiihnedobmlmillhodjkdmb/fonts/CircularXXWeb-Book.woff2') format('woff2');
+</style></head>
+  <body></body>
+  
+  <script>const tokenData = {"tokenId":"381366","hash":"0x464834daba8a1744f8e9911af98006a1b1ed608c19ac160a75d5c582d83bcafc"}</script>
+  <script>
+
+    class Random {
+    constructor() {
+        this.useA = false;
+        let sfc32 = function (uint128Hex) {
+        let a = parseInt(uint128Hex.substring(0, 8), 16);
+        let b = parseInt(uint128Hex.substring(8, 16), 16);
+        let c = parseInt(uint128Hex.substring(16, 24), 16);
+        let d = parseInt(uint128Hex.substring(24, 32), 16);
+        return function () {
+            a |= 0;
+            b |= 0;
+            c |= 0;
+            d |= 0;
+            let t = (((a + b) | 0) + d) | 0;
+            d = (d + 1) | 0;
+            a = b ^ (b >>> 9);
+            b = (c + (c << 3)) | 0;
+            c = (c << 21) | (c >>> 11);
+            c = (c + t) | 0;
+            return (t >>> 0) / 4294967296;
+        };
+        };
+        // seed prngA with first half of tokenData.hash
+        this.prngA = new sfc32(tokenData.hash.substring(2, 34));
+        // seed prngB with second half of tokenData.hash
+        this.prngB = new sfc32(tokenData.hash.substring(34, 66));
+        for (let i = 0; i < 1e6; i += 2) {
+        this.prngA();
+        this.prngB();
+        }
+    }
+    // random number between 0 (inclusive) and 1 (exclusive)
+    random_dec() {
+        this.useA = !this.useA;
+        return this.useA ? this.prngA() : this.prngB();
+    }
+    // random number between a (inclusive) and b (exclusive)
+    random_num(a, b) {
+        return a + (b - a) * this.random_dec();
+    }
+    // random integer between a (inclusive) and b (inclusive)
+    // requires a < b for proper probability distribution
+    random_int(a, b) {
+        return Math.floor(this.random_num(a, b + 1));
+    }
+    // random boolean with p as percent liklihood of true
+    random_bool(p) {
+        return this.random_dec() < p;
+    }
+    // random value in an array of items
+    random_choice(list) {
+        return list[this.random_int(0, list.length - 1)];
+    }
+    }
+
+    let R = new Random();
+
+    var barNum = ['4m', '8m'][R.random_int(0,1)];
+    var keyChooser = R.random_int(0,11);
+    
+    const options = [1, 2, 3, 4, 5];
+    const probabilities = [0.4, 0.3, 0.2, 0.07, 0.03];
+
+    //weighted choice logic
+    function weightedChoice(options, probabilities) {
+        let sum = 0;
+        const r = R.random_dec();
+        for (let i = 0; i < probabilities.length; i++) {
+            sum += probabilities[i];
+            if (r <= sum) return options[i];
+        }
+    }
+
+    var inverted = R.random_bool(0.1);
+    var reharmNum = R.random_int(0,4);
+        
+    let melodySystem = weightedChoice(options, probabilities);
+
+    var double = R.random_bool(0.7);
+    var doubleBass = R.random_bool(0.6);
+
+    var bassNoteLength = ["8n", "2m"][R.random_int(0,1)];
+
+    var phaserOn = R.random_bool(0.2);
+    var wildMode = R.random_bool(0.3);         //8ves of arp are way up and down
+        if (inverted) {wildMode = R.random_bool(0.8)}
+    var wildMode2 = R.random_bool(0.2);
+    var hyperMode = R.random_bool(0.01);    //membrane synth for pitch env
+    var fuzzy = R.random_bool(0.035);       // some FM
+
+    let fuzzyOptions = [1, 4];
+    let fuzzyProbs = [0.97, 0.03]
+    let fuzzyCount = 0;
+        if (fuzzy) {
+            fuzzyCount = weightedChoice(fuzzyOptions, fuzzyProbs)
+        }
+
+    let hyperNum = 0
+        if (hyperMode) {hyperNum = 1};
+
+    var hyper8ves = 10;
+
+    let lfoSpeedFactor = R.random_int(1, 10);
+    let lfoAmpFactor = R.random_int(0, 5) / 10;
+
+    var melFilterFreq = R.random_int(400, 600);
+
+    // Set the BPM
+    var storeTempo = R.random_int(70, 140);
+        if (inverted) {storeTempo = R.random_int(70, 110);}
+   
+    Tone.Transport.bpm.value = storeTempo;
+
+    var optionSpace = ["far", "near", "close"];
+    var probSpace = [0.2, 0.7, 0.1]
+    var spaceSize = weightedChoice(optionSpace, probSpace);
+    
+    var port = 0;
+    var portOn = R.random_bool(0.2);
+        if (hyperMode && !inverted) {portOn = false}
+    if (portOn) {port = 1};
+
+
+
+    //voices
+    var bassOSC = 3
+    var bassOSC2 = R.random_int(1, 3);
+
+    var melOSC = R.random_int(0, 3);
+    var melOSC2 = R.random_int(0, 3);
+
+    //avoid sq / saw combo
+    if (melOSC === 3 && melOSC2 === 2 && double) {melOSC2 = (melOSC2 + R.random_int(1, 3)) % 4};
+    if (melOSC === 2 && melOSC2 === 3 && double) {melOSC2 = (melOSC2 + R.random_int(1, 3)) % 4};
+
+    var randomRelease4 = R.random_dec() / 2;
+
+    var bassSound = ["pluck", "sub"][R.random_int(0,1)];
+
+    var melSound = ["pluck", "womp"][R.random_int(0,1)];
+
+    var startingChord = [0,1,2,4][R.random_int(0,3)];
+
+    var invertNum1 = 1;
+    var invertNum0 = 0;
+
+    if (inverted) {
+        invertNum1 = 0;
+        invertNum0 = 1;
+    };
+
+    let bass8ves = 2;
+    let bassLOW = R.random_bool(0.1);
+    if (bassLOW) {bass8ves = 1};
+
+    let invertBassShape = ["short", "medium", "long"][R.random_int(1,2)]
+    
+
+    // Fisher-Yates shuffle function to shuffle the array randomly
+    let shuffleDecoder = [0, 1, 2, 3, 4, 5]
+
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(R.random_dec() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+            [shuffleDecoder[i], shuffleDecoder[j]] = [shuffleDecoder[j], shuffleDecoder[i]];
+        }
+        }
+
+    var octaveNotes = R.random_int(4,5);
+    var longNotes = 1
+
+    const allNotes = ["A","A#","B","C","C#","D","D#","E","F","F#","G","G#"];
+
+    var keyOf = allNotes[keyChooser];
+
+    var scaleIntervals = [2, 1, 2, 2, 1, 2, 2]; // minor scale
+
+    function getScale(rootNote) {
+        let scale = [rootNote];
+        let currentIndex = allNotes.indexOf(rootNote);
+        
+        scaleIntervals.forEach(interval => {
+            currentIndex = (currentIndex + interval) % 12;
+            scale.push(allNotes[currentIndex]);
+        });
+
+        return scale;
+    }
+
+    let wild = 0;
+
+    if (wildMode) {wild = 1};
+
+    var scaleNotes = getScale(keyOf);
+
+    var genNotes = [scaleNotes[0], scaleNotes[1], scaleNotes[4], scaleNotes[2], scaleNotes[3], scaleNotes[6]];
+
+    // rotate the array by 'interval' positions
+    shuffleArray(genNotes);
+
+    var bassBranchNotes = [scaleNotes[0], scaleNotes[2], scaleNotes[3], scaleNotes[4], scaleNotes[5], scaleNotes[6]];
+
+    var bassProg = [];
+    var melProg = [];
+
+    var chordBranches = [
+        [scaleNotes[0], scaleNotes[2], scaleNotes[4], scaleNotes[1]],
+        [scaleNotes[6], scaleNotes[1], scaleNotes[4]],
+        [scaleNotes[3], scaleNotes[5], scaleNotes[2], scaleNotes[4]],
+        [scaleNotes[4], scaleNotes[6], scaleNotes[1], scaleNotes[3]],
+        [scaleNotes[5], scaleNotes[2], scaleNotes[0], scaleNotes[4]],
+        [scaleNotes[6], scaleNotes[5], scaleNotes[1], scaleNotes[3]]
+    ];
+
+    var chords = [
+    [1,2,3,4,5],
+    [0,2,3,4,5],
+    [0,1,3,4,5],
+    [0,2,4,5],
+    [0,1,2,3,5],
+    [0,1,2,4]
+    ];
+
+    if (inverted) {chords = [
+        [0,1,3,5],
+        [0,1,3,5],
+        [0,1,3,5],
+        [0,1,3,5],
+        [0,1,3,5],
+        [0,1,3,5],
+    ]}
+
+    var progressionRoman = [];
+
+    function getRandomElement(arr) {
+    return arr[Math.floor(R.random_dec() * arr.length)];
+    }
+
+    function generateProgression(startChord, length) {
+        let progression = [chordBranches[startChord]];
+        bassProg.push(bassBranchNotes[startChord]);
+        melProg.push(getRandomElement(chordBranches[startChord]));
+
+        for (let i = 1; i < length; i++) {
+            let lastChordIndex = chords[chordBranches.indexOf(progression[i - 1])];
+            let nextChordIndex = getRandomElement(lastChordIndex);
+            progression.push(chordBranches[nextChordIndex]);
+            bassProg.push(bassBranchNotes[nextChordIndex]);
+            melProg.push(getRandomElement(chordBranches[nextChordIndex]))
+            progressionRoman.push(nextChordIndex);
+        }
+
+    return progression;
+    }
+
+    var branchingChordsProg = generateProgression(startingChord, 8);
+    if (inverted) {branchingChordsProg = generateProgression(0, 8)}
+
+
+    var arpStart = [0, 2, 3, 4, 5];
+
+    var arpBranches = [
+        [0, 1, 2, 4, 6, 0],
+        [0, 2, 3, 6],
+        [0, 1, 3, 4, 5, 6],
+        [1, 2, 4, 6],
+        [0, 2, 3, 5, 6],
+        [0, 2, 4, 6],
+        [0, 1, 2, 4, 5]
+    ];
+
+    var arpBranchesnotbig = [
+        [2, 4],
+        [3, 6],
+        [0, 4, 6],
+        [0, 5],
+        [1, 6],
+        [0, 2],
+        [0, 4]
+    ];
+
+    const branchRhythms = [
+        [0, 16, 32, 48],
+        [0, 12, 32, 44],
+        [0, 32, 0, 32],
+        [0, 24, 32, 56],
+        [0, 32, 0, 32]
+    ]
+
+    var progressionRoman2 = [scaleNotes.indexOf(bassProg[0]), scaleNotes.indexOf(bassProg[1]), scaleNotes.indexOf(bassProg[2]), scaleNotes.indexOf(bassProg[3]), scaleNotes.indexOf(bassProg[4]), scaleNotes.indexOf(bassProg[5]), scaleNotes.indexOf(bassProg[6]), scaleNotes.indexOf(bassProg[7])];
+
+    function generateArpBranches() {
+        let bassArp = [scaleNotes[getRandomElement(arpStart)]];
+        let lastNoteIndex = scaleNotes.indexOf(bassProg[0]);  // Initial index is 0 since it's scaleNotes[0]
+
+        for (let i = branchRhythms[reharmNum][0]; i < branchRhythms[reharmNum][1]; i++) {
+            let nextNoteIndex = getRandomElement(arpBranches[lastNoteIndex]);
+            bassArp[i] = (scaleNotes[nextNoteIndex]);
+            lastNoteIndex = nextNoteIndex;
+            notes64c[i] = nextNoteIndex * 6 / 8;
+        }
+
+        for (let j = branchRhythms[reharmNum][1]; j < branchRhythms[reharmNum][2]; j++) {
+            bassArp[j] = scaleNotes[(scaleNotes.indexOf(bassArp[j - branchRhythms[reharmNum][1]]) + scaleNotes.indexOf(bassProg[1]) - scaleNotes.indexOf(bassProg[0]) + 7) % 7];
+            notes64c[j] = ((scaleNotes.indexOf(bassArp[j - branchRhythms[reharmNum][1]]) + scaleNotes.indexOf(bassProg[1]) - scaleNotes.indexOf(bassProg[0]) + 7) % 7) * 6 / 8;
+        }
+        
+        for (let j = branchRhythms[reharmNum][2]; j < branchRhythms[reharmNum][3]; j++) {
+            bassArp[j] = scaleNotes[(scaleNotes.indexOf(bassArp[j - branchRhythms[reharmNum][2]]) + scaleNotes.indexOf(bassProg[2]) - scaleNotes.indexOf(bassProg[1]) + 7) % 7];
+            notes64c[j] = ((scaleNotes.indexOf(bassArp[j - branchRhythms[reharmNum][2]]) + scaleNotes.indexOf(bassProg[2]) - scaleNotes.indexOf(bassProg[1]) + 7) % 7) * 6 / 8;
+        }
+        
+        for (let j = branchRhythms[reharmNum][3]; j < 64; j++) {
+            bassArp[j] = scaleNotes[(scaleNotes.indexOf(bassArp[j - branchRhythms[reharmNum][3]]) + scaleNotes.indexOf(bassProg[3]) - scaleNotes.indexOf(bassProg[2]) + 7) % 7];
+            notes64c[j] = ((scaleNotes.indexOf(bassArp[j - branchRhythms[reharmNum][3]]) + scaleNotes.indexOf(bassProg[3]) - scaleNotes.indexOf(bassProg[2]) + 7) % 7) * 6 / 8;
+        }
+
+        //for (let j = 49; j < 65; j++) {
+        //    bassArp[j] = scaleNotes[(scaleNotes.indexOf(bassArp[j - 48]) + 5) % 8];
+        //}
+
+        return bassArp;
+    }
+
+    const lfo1 = new Tone.LFO({
+        frequency: `${0.3 * lfoSpeedFactor}hz`,
+        min: -20,         // Modulate 30Hz below the base frequency
+        max: 20,          // Modulate 30Hz above the base frequency
+        amplitude: 0.5 + lfoAmpFactor,
+        type: "sine"
+    });
+
+    const lfo2 = new Tone.LFO({
+        frequency: '800hz', 
+        min: -800,         
+        max: 800,          
+        amplitude: 0.2 + 0.2 * fuzzyCount,
+        type: "sine"
+    });
+    if (inverted) {lfo2.frequency.value = 400}//`${80 * (4 - fuzzyCount)}hz`} //80
+
+    const lfo3 = new Tone.LFO({
+        frequency: '800hz',
+        min: -800,         
+        max: 800,          
+        type: "sine"
+    });
+
+    const lfo4 = new Tone.LFO({     //bass filter lfo
+        frequency: '0.8hz',
+        min: -30,         
+        max: 30,          
+        type: "sine"
+    });
+
+    const lfo5 = new Tone.LFO({     //bass filter lfo for fuzzy
+        frequency: '400hz',
+        min: -40,         
+        max: 40,          
+        type: "sine"
+    });
+
+    lfo1.start();
+    lfo2.start();
+    lfo3.start();
+    lfo4.start();
+    lfo5.start();
+
+
+
+    // Create the bass
+
+    if (bassSound === "pluck") {
+
+        var bassSynth = new Tone.MonoSynth({ // simple bass
+            volume: -5,
+            oscillator: {
+                type: ['sine', 'square', 'triangle', 'sawtooth'][bassOSC]
+            },
+            envelope: {
+                attack: 0.01,//randomAttack2,
+                decay: 0,//randomDecay2,
+                sustain: 1,//randomSustain2,
+                release: 1//randomRelease2
+            },
+        filterEnvelope : {
+                attack : 0.01,//randomAttack3, //0.06 ,
+                decay : 2,//randomDecay3, //0.3 ,
+                sustain : 0,//randomSustain3, //0.5 ,
+                release : 2,//randomRelease3, //2 ,
+                baseFrequency : 200,// + hyperNum * 5000,
+                octaves : 3,
+                exponent : 5
+            }
+        });
+
+    }
+
+    if (bassSound === "pluck" && doubleBass) {
+
+        var bassSynth2 = new Tone.MonoSynth({ // simple bass
+            volume: -5,
+            detune: -14,
+            oscillator: {
+                type: ['sine', 'square', 'triangle', 'sawtooth'][bassOSC2]
+            },
+            envelope: {
+                attack: 0.01,//randomAttack2,
+                decay: 0,//randomDecay2,
+                sustain: 1,//randomSustain2,
+                release: 1//randomRelease2
+            },
+        filterEnvelope : {
+                attack : 0.01,//randomAttack3, //0.06 ,
+                decay : 2,//randomDecay3, //0.3 ,
+                sustain : 0,//randomSustain3, //0.5 ,
+                release : 2,//randomRelease3, //2 ,
+                baseFrequency : 200,// + hyperNum * 500,
+                octaves : 3,
+                exponent : 5
+            }
+        });
+    }
+
+    if (bassSound === "sub") {
+
+        var bassSynth = new Tone.MonoSynth({ // long release
+            volume: -5,
+            oscillator: {
+                type: ['sine', 'square', 'triangle', 'sawtooth'][bassOSC]
+            },
+            envelope: {
+                attack: 0.01,//randomAttack2,
+                decay: 0,//randomDecay2,
+                sustain: 1,//randomSustain2,
+                release: 7 + R.random_int(0,8)//randomRelease2
+            },
+            filterEnvelope : {
+                attack : 0.001,//randomAttack3, //0.06 ,
+                decay : 2,//randomDecay3, //0.3 ,
+                sustain : 0,//randomSustain3, //0.5 ,
+                release : 2,//randomRelease3, //2 ,
+                baseFrequency : 300,//+ hyperNum * 5000,
+                octaves : 1,
+                exponent : 9
+            }
+        });
+    }
+    if (bassSound === "sub" && doubleBass) {
+
+        var bassSynth2 = new Tone.MonoSynth({ // long release
+            volume: -5,
+            detune: -14,
+            oscillator: {
+                type: ['sine', 'square', 'triangle', 'sawtooth'][bassOSC2]
+            },
+            envelope: {
+                attack: 0.01,//randomAttack2,
+                decay: 0,//randomDecay2,
+                sustain: 1,//randomSustain2,
+                release: 7 + R.random_int(0,8)//randomRelease2
+            },
+            filterEnvelope : {
+                attack : 0.001,//randomAttack3, //0.06 ,
+                decay : 2,//randomDecay3, //0.3 ,
+                sustain : 0,//randomSustain3, //0.5 ,
+                release : 2,//randomRelease3, //2 ,
+                baseFrequency : 300,// + hyperNum * 500,
+                octaves : 1,
+                exponent : 9
+            }
+        });
+    }
+
+    if (melSound === "pluck" && !hyperMode || melSound === "pluck" && hyperMode && inverted) {
+        var monoSynth = new Tone.MonoSynth({
+            volume: -20,
+            detune : 0,
+            oscillator: { 
+                type: ['sine', 'triangle', 'square', 'sawtooth'][melOSC] 
+            },
+            envelope: {
+                attack: 0.01,
+                decay: (R.random_dec() * (2.0 - 0.2)) + 0.2,
+                sustain: 1,//R.random_dec() * 0.75,
+                release: R.random_dec() * 2
+            },
+                filterEnvelope : {
+                attack : 0.01 ,
+                decay : 0.1 + R.random_dec() * 0.4, //0.05 ,
+                sustain : 0,//randomSustain4, //0.5 ,
+                release : randomRelease4, //2 ,
+                baseFrequency : melFilterFreq,
+                octaves : 3 ,
+                exponent : R.random_int(1,10)
+        }
+        });
+    }
+
+    if (melSound === "pluck" && double && !hyperMode || melSound === "pluck" && double && hyperMode && inverted) {
+        var monoSynth2 = new Tone.MonoSynth({
+            volume: -20,
+            detune : -20,
+            oscillator: { 
+                type: ['sine', 'triangle', 'square', 'sawtooth'][melOSC2] 
+            },
+            envelope: {
+                attack: 0.01,
+                decay: (R.random_dec() * (2.0 - 0.2)) + 0.2,
+                sustain: 1,//R.random_dec() * 0.75,
+                release: R.random_dec() * 2
+            },
+                filterEnvelope : {
+                attack : 0.01 ,
+                decay : 0.1 + R.random_dec() * 0.4, //0.05 ,
+                sustain : 0,//randomSustain4, //0.5 ,
+                release : randomRelease4, //2 ,
+                baseFrequency : melFilterFreq,
+                octaves : 3 ,
+                exponent : R.random_int(1,10)
+        }
+        });
+    }
+
+
+    if (melSound === "pluck" && hyperMode && !inverted) {
+        var monoSynth = new Tone.MembraneSynth({
+            volume: -20,
+            detune : 0,
+            octaves: hyper8ves,
+            oscillator: { 
+                type: ['sine', 'triangle', 'square', 'sawtooth'][melOSC] 
+            },
+            pitchDecay: 0.05,
+            envelope: {
+                attack: 0.01,
+                decay: (R.random_dec() * (2.0 - 0.2)) + 0.2,
+                sustain: 1,//R.random_dec() * 0.75,
+                release: R.random_dec() * 2
+            }
+        });
+    }
+
+    if (melSound === "pluck" && double && hyperMode && !inverted) {
+        var monoSynth2 = new Tone.MembraneSynth({
+            volume: -20,
+            detune : -20,
+            octaves: hyper8ves,
+            pitchDecay: 0.05,
+            oscillator: { 
+                type: ['sine', 'triangle', 'square', 'sawtooth'][melOSC2] 
+            },
+            envelope: {
+                attack: 0.01,
+                decay: (R.random_dec() * (2.0 - 0.2)) + 0.2,
+                sustain: 1,//R.random_dec() * 0.75,
+                release: R.random_dec() * 2
+            }
+        });
+    }
+
+
+
+    if (melSound === "womp" && !hyperMode || melSound === "womp" && hyperMode && inverted) {
+        var monoSynth = new Tone.MonoSynth({
+            volume: -20,
+            detune : 0,
+            oscillator: { 
+                type: ['sine', 'triangle', 'square', 'sawtooth'][melOSC] 
+            },
+            envelope: {
+                attack: 0.5,
+                decay: (R.random_dec() * (2.0 - 0.2)) + 0.2,
+                sustain: 1,//R.random_dec() * 0.75,
+                release: R.random_dec() * 2
+            },
+                filterEnvelope : {
+                attack : 0.2,
+                decay : 0 + R.random_dec() * 0.4, //0.05 ,
+                sustain : 1,//randomSustain4, //0.5 ,
+                release : randomRelease4, //2 ,
+                baseFrequency : melFilterFreq,
+                octaves : 3,
+                exponent : R.random_int(1,5)
+        }
+        });
+    }
+
+    if (melSound === "womp" && double && !hyperMode || melSound === "womp" && double && hyperMode && inverted) {
+        var monoSynth2 = new Tone.MonoSynth({
+            volume: -20,
+            detune : -10,
+            oscillator: { 
+                type: ['sine', 'triangle', 'square', 'sawtooth'][melOSC2] 
+            },
+            envelope: {
+                attack: 0.5,
+                decay: (R.random_dec() * (2.0 - 0.2)) + 0.2,
+                sustain: 1,//R.random_dec() * 0.75,
+                release: R.random_dec() * 2
+            },
+                filterEnvelope : {
+                attack : 0.2,
+                decay : 0 + R.random_dec() * 0.4, //0.05 ,
+                sustain : 1,//randomSustain4, //0.5 ,
+                release : randomRelease4, //2 ,
+                baseFrequency : melFilterFreq,
+                octaves : 3,
+                exponent : R.random_int(1,5)
+        }
+        });
+    }
+
+
+    if (melSound === "womp" && hyperMode && !inverted) {
+        var monoSynth = new Tone.MembraneSynth({
+            volume: -20,
+            octaves: hyper8ves,
+            pitchDecay: 0.05,
+            oscillator: { 
+                type: ['sine', 'triangle', 'square', 'sawtooth'][melOSC] 
+            },
+            envelope: {
+                attack: 0.5,
+                decay: (R.random_dec() * (2.0 - 0.2)) + 0.2,
+                sustain: 1,//R.random_dec() * 0.75,
+                release: 2,//R.random_dec() * 2
+            },
+        });
+    }
+
+    if (melSound === "womp" && double && hyperMode && !inverted) {
+        var monoSynth2 = new Tone.MembraneSynth({
+            volume: -20,
+            octaves: hyper8ves,
+            pitchDecay: 0.05,
+            oscillator: { 
+                type: ['sine', 'triangle', 'square', 'sawtooth'][melOSC2] 
+            },
+            envelope: {
+                attack: 0.5,
+                decay: (R.random_dec() * (2.0 - 0.2)) + 0.2,
+                sustain: 1,//R.random_dec() * 0.75,
+                release: 2//R.random_dec() * 2
+            },
+        });
+    }
+
+
+    if (bassNoteLength === "2m") {
+        bassSynth.filterEnvelope.baseFrequency = 180;
+    }
+    
+    let wildNum = 0;
+    let wildNum2 = 0
+
+    if (wildMode) {wildNum = 1};
+    if (wildMode && wildMode2) {wildNum2 = 1}
+
+    function createWildMult() {
+
+        let multTemp = [];
+
+        let wildVar1a
+        let wildVar1b
+        let wildVar2a
+        let wildVar2b
+
+        let skip = R.random_int(2,6);
+
+        for (i = 0; i < 16; i ++) {
+            wildVar1a = R.random_int(0,1);
+            wildVar1b = R.random_int(0,1);
+            wildVar2a = R.random_int(0,1);
+            wildVar2b = R.random_int(0,1);
+
+            multTemp[i] = (wildVar1a * wildVar1b + (wildVar2a * wildNum2) * (wildVar2b * wildNum2)) * wildNum;
+        }
+
+        return multTemp;
+    }
+
+    var wild8ves = createWildMult();
+
+    if (inverted) {
+        monoSynth.envelope.attack = 1
+        if (double) {monoSynth2.envelope.attack = 1}
+        monoSynth.filterEnvelope.release = 2
+        if (double) {monoSynth2.filterEnvelope.release = 2}
+        monoSynth.envelope.release = 2
+        if (double) {monoSynth2.envelope.release = 2}
+    }
+
+    let portShift = map(storeTempo, 70, 140, 1.5, 0.5)
+    
+    if (!inverted){
+        monoSynth.portamento = 0.02 * port * portShift;
+        if (double) {monoSynth2.portamento = 0.02 * port * portShift};
+    }
+    if (inverted){
+        bassSynth.portamento = 0.02 * port * portShift;
+        if (doubleBass) {bassSynth2.portamento = 0.02 * port * portShift};
+    }
+
+
+
+
+
+
+
+
+
+
+    var pitchShiftMel1 = new Tone.PitchShift ([0]);
+    var pitchShiftMel2 = new Tone.PitchShift ([0]);
+    var pitchShiftBass = new Tone.PitchShift ([0]);
+
+    var chebyMel = new Tone.Chebyshev(40, "4x");    //40
+    var chebyBass = new Tone.Chebyshev(40, "4x");    //40
+        chebyMel.wet.value = 0;
+        chebyBass.wet.value = 0;
+
+    var gainMel1 = new Tone.Gain ([1]);
+    var gainBass = new Tone.Gain ([0.8]);
+
+    var filterMel1 = new Tone.Filter({
+        type: 'lowpass', // the type of the filter
+        frequency: 30000, // the cutoff frequency
+        rolloff: -48, // the rolloff rate
+        Q: 1, // the Q value
+        gain: 0 // the gain value (only valid for certain filter types)
+    });
+
+    var filterBass = new Tone.Filter({
+        type: 'lowpass', // the type of the filter
+        frequency: 30000, // the cutoff frequency
+        rolloff: -48, // the rolloff rate
+        Q: 1, // the Q value
+        gain: 0 // the gain value (only valid for certain filter types)
+    });
+
+    // For the lead when inverted
+    var reverbMel1 = new Tone.Reverb({
+        decay: 3,  // Reverb decay time in seconds (can be randomized)
+        preDelay: 0.1,  // Time before reverb is heard (can be randomized)
+        wet: 0.2//R.random_dec() / 1.5 + 0.2
+    });
+
+    var reverbBass = new Tone.Reverb({
+        decay: 3,  // Reverb decay time in seconds (can be randomized)
+        preDelay: 0.1,  // Time before reverb is heard (can be randomized)
+        wet: 0//R.random_dec() / 1.5 + 0.2
+    });
+
+    var feedbackDelayMel1 = new Tone.FeedbackDelay("8n", 0.5);  // 8n delay time and 50% feedback
+        feedbackDelayMel1.wet.value = 0.1;
+
+    var feedbackDelayBass = new Tone.FeedbackDelay("8n", 0.5);  // 8n delay time and 50% feedback
+        feedbackDelayBass.wet.value = 0;
+
+    if (double) {
+        monoSynth.volume.value = -22;
+        monoSynth2.volume.value = -22;
+    }
+
+    if (doubleBass) {
+        bassSynth.volume.value = -10;
+        bassSynth2.volume.value = -10;
+        if (bassNoteLength === "2m"){
+            bassSynth.volume.value = -13;
+            bassSynth2.volume.value = -13;
+        }
+    }
+
+    if (portOn && !hyperMode || inverted && !hyperMode) {
+        monoSynth.envelope.release = 10;
+        monoSynth.filterEnvelope.release = 5;
+        if (double) {
+            monoSynth2.envelope.release = 10;        
+            monoSynth2.filterEnvelope.release = 5;
+        }
+        if (inverted)
+            bassSynth.envelope.release = 10;
+            bassSynth.filterEnvelope.release = 5;
+            if (doubleBass) {
+                bassSynth2.envelope.release = 10;        
+                bassSynth2.filterEnvelope.release = 5;
+            }
+    };
+
+    if (inverted && !hyperMode) {
+        monoSynth.envelope.attack = 3;
+        monoSynth.filterEnvelope.release = 5;
+    };
+
+    const hyperFilterEnv = new Tone.Envelope({
+        attack: 0.01,
+        decay: 0.2,
+        sustain: 0,
+        release: 0.8,
+        attackCurve: 'exponential'
+    });
+
+    const panner1m = new Tone.Panner(0);
+    const panner2m = new Tone.Panner(0);
+    const panner1b = new Tone.Panner(0);
+    const panner2b = new Tone.Panner(0);
+
+    var phaserMel1 = new Tone.Phaser({
+        "frequency" : 0.1,
+        "octaves" : 2,
+        "baseFrequency" : 500,
+        "wet": 0
+    })
+
+    var phaserBass = new Tone.Phaser({
+        "frequency" : 0.1,
+        "octaves" : 2,
+        "baseFrequency" : 500,
+        "wet": 0
+    })
+
+    if (phaserOn) {
+        if (!inverted) {phaserMel1.wet.value = 0.5}
+        if (inverted) {phaserBass.wet.value = 0.5}
+    }
+
+    var distorto = new Tone.Distortion ([0.16]);
+        distorto.wet.value = 0.16;
+        //if (inverted) {distorto.wet.value = 0};
+
+    //if (doubleBass && !inverted) {
+    //    bassSynth.connect(panner1b);
+    //    bassSynth2.connect(panner2b);
+    //};
+
+    
+    //panner1m.pan.value = 0;  // Pan synth1 to the left
+    //panner2m.pan.value = 0;   // Pan synth2 to the right
+
+    //panner1b.pan.value = 0;
+    //panner2b.pan.value = 0;
+
+    if (bassOSC2 === 3 && doubleBass) {
+        panner1b.pan.value = -0.8;  // Pan synth1 to the left
+        panner2b.pan.value = 0.8;   // Pan synth2 to the right
+    }
+
+    if (double && !inverted) {
+        panner1m.pan.value = -0.8;
+        panner2m.pan.value = 0.8; 
+    }
+
+    if (hyperMode) {
+        if (!inverted) {
+            chebyMel.order = 40
+            chebyMel.wet.value = 0.4
+        };
+        if (inverted) {
+            chebyBass.order = 10;
+            chebyBass.wet.value = 0.4
+            filterMel1.frequency.value = melFilterFreq
+            //distorto.wet.value = 0;
+        }
+    }
+
+    //bass fx for invert
+    if (inverted) {
+        reverbBass.wet.value = 0.1;
+        feedbackDelayBass.wet.value = 0.1;
+    }
+
+    if (!hyperMode) {
+        lfo1.connect(monoSynth.detune);
+        lfo4.connect(bassSynth.filter.frequency);
+        //lfo5.connect(bassSynth.filter.frequency);
+        //if (doubleBass) {lfo5.connect(bassSynth2.filter.frequency)}
+    };
+
+    if (!hyperMode && fuzzy) {
+        if (!inverted) {lfo2.connect(monoSynth.detune)
+            if (double) {lfo2.connect(monoSynth2.detune)}
+        };
+        if (inverted) {lfo2.connect(bassSynth.detune)
+            if (doubleBass) {lfo2.connect(bassSynth2.detune)}
+        }  
+    };
+    
+
+    if (inverted) {lfo1.connect(bassSynth.detune)};
+    if (inverted && doubleBass) {lfo1.connect(bassSynth2.detune)};
+    
+    if (inverted && fuzzy) {lfo5.connect(bassSynth.filter.frequency)};
+    if (inverted && fuzzy & doubleBass) {lfo5.connect(bassSynth2.filter.frequency)};
+
+
+    monoSynth.connect(pitchShiftMel1);
+    pitchShiftMel1.connect(chebyMel);
+    chebyMel.connect(gainMel1);
+    gainMel1.connect(phaserMel1);
+    phaserMel1.connect(filterMel1);
+    filterMel1.connect(panner1m);
+    panner1m.connect(feedbackDelayMel1);
+    feedbackDelayMel1.connect(reverbMel1);
+    reverbMel1.connect(distorto);
+    distorto.toDestination();
+
+    if (double) {
+        monoSynth2.connect(pitchShiftMel2);
+        pitchShiftMel2.connect(chebyMel);
+        chebyMel.connect(gainMel1);
+        gainMel1.connect(phaserMel1);
+        phaserMel1.connect(filterMel1);
+        filterMel1.connect(panner2m);
+        panner2m.connect(feedbackDelayMel1);
+        feedbackDelayMel1.connect(reverbMel1);
+        reverbMel1.connect(distorto);
+        distorto.toDestination();
+    }
+
+    bassSynth.connect(pitchShiftBass);
+    pitchShiftBass.connect(chebyBass);
+    chebyBass.connect(gainBass);
+    gainBass.connect(phaserBass);
+    phaserBass.connect(filterBass);
+    filterBass.connect(panner1b);
+    panner1b.connect(feedbackDelayBass);
+    feedbackDelayBass.connect(reverbBass);
+    reverbBass.toDestination();
+
+    if (doubleBass) {
+        bassSynth2.connect(pitchShiftBass);
+        pitchShiftBass.connect(chebyBass);
+        chebyBass.connect(gainBass);
+        gainBass.connect(phaserBass);
+        phaserBass.connect(filterBass);
+        filterBass.connect(panner2b);
+        panner2b.connect(feedbackDelayBass);
+        feedbackDelayBass.connect(reverbBass);
+        reverbBass.toDestination();
+    }
+
+    if (spaceSize === "close") {
+        feedbackDelayMel1.wet.value = 0;
+        reverbMel1.wet.value = 0.05;
+    }
+    if (spaceSize === "far") {
+        feedbackDelayMel1.wet.value = 0.18;
+        reverbMel1.wet.value = 0.4;
+    }
+
+    var bassBranching1 = [
+        { time: "0:0:0", note: `${bassProg[0]}${longNotes}`},
+        { time: "2:0:0", note: `${bassProg[1]}${longNotes}`},
+        { time: "4:0:0", note: `${bassProg[2]}${longNotes}`},
+        { time: "6:0:0", note: `${bassProg[3]}${longNotes}`}
+    ];
+
+    var bassBranching2 = [
+        { time: "0:0:0", note: `${bassProg[0]}${longNotes}`},
+        { time: "0:3:0", note: `${bassProg[1]}${longNotes}`}, 
+        { time: "2:0:0", note: `${bassProg[2]}${longNotes}`},
+        { time: "2:3:0", note: `${bassProg[3]}${longNotes}`},
+        { time: "4:0:0", note: `${bassProg[4]}${longNotes}`}, 
+        { time: "4:3:0", note: `${bassProg[5]}${longNotes}`}, 
+        { time: "6:0:0", note: `${bassProg[6]}${longNotes}`}, 
+        { time: "6:3:0", note: `${bassProg[7]}${longNotes}`} 
+    ];
+
+    var bassBranching3 = [
+        { time: "0:0:0", note: `${bassProg[0]}${longNotes}`},
+        { time: "1:2:0", note: `${bassProg[1]}${longNotes}`}, 
+        { time: "2:0:0", note: `${bassProg[2]}${longNotes}`},
+        { time: "3:2:0", note: `${bassProg[3]}${longNotes}`},
+        { time: "4:0:0", note: `${bassProg[4]}${longNotes}`}, 
+        { time: "5:2:0", note: `${bassProg[5]}${longNotes}`}, 
+        { time: "6:0:0", note: `${bassProg[6]}${longNotes}`},
+        { time: "7:0:0", note: `${bassProg[7]}${longNotes}`} 
+    ];
+
+    var bassBranching4 = [
+        { time: "0:0:0", note: `${bassProg[0]}${longNotes}`},
+        { time: "1:0:0", note: `${bassProg[1]}${longNotes}`},
+        { time: "2:0:0", note: `${bassProg[2]}${longNotes}`},
+        { time: "3:0:0", note: `${bassProg[3]}${longNotes}`},
+        { time: "4:0:0", note: `${bassProg[4]}${longNotes}`},
+        { time: "5:0:0", note: `${bassProg[5]}${longNotes}`}, 
+        { time: "6:0:0", note: `${bassProg[6]}${longNotes}`},
+        { time: "7:0:0", note: `${bassProg[7]}${longNotes}`}
+    ];
+
+    var bassBranching5 = [
+        { time: "0:0:0", note: `${bassProg[0]}${longNotes}`},
+        { time: "2:0:0", note: `${bassProg[1]}${longNotes}`},
+        { time: "3:0:0", note: `${bassProg[2]}${longNotes}`},
+        { time: "4:0:0", note: `${bassProg[3]}${longNotes}`},
+        { time: "6:0:0", note: `${bassProg[4]}${longNotes}`},
+        { time: "7:0:0", note: `${bassProg[5]}${longNotes}`},
+    ];
+
+    if (inverted) {
+        var bassBranching1 = [
+            { time: "0:0:0", note: `${melProg[0]}${octaveNotes}`},
+            { time: "2:0:0", note: `${melProg[1]}${octaveNotes}`},
+            { time: "4:0:0", note: `${melProg[2]}${octaveNotes}`},
+            { time: "6:0:0", note: `${melProg[3]}${octaveNotes}`}
+        ]
+        var bassBranching2 = [
+            { time: "0:0:0", note: `${melProg[0]}${octaveNotes}`},
+            { time: "2:0:0", note: `${melProg[1]}${octaveNotes}`},
+            { time: "4:0:0", note: `${melProg[2]}${octaveNotes}`},
+            { time: "6:0:0", note: `${melProg[3]}${octaveNotes}`}
+        ]
+            var bassBranching3 = [
+            { time: "0:0:0", note: `${melProg[0]}${octaveNotes}`},
+            { time: "2:0:0", note: `${melProg[1]}${octaveNotes}`},
+            { time: "4:0:0", note: `${melProg[2]}${octaveNotes}`},
+            { time: "6:0:0", note: `${melProg[3]}${octaveNotes}`}
+        ]
+            var bassBranching4 = [
+            { time: "0:0:0", note: `${melProg[0]}${octaveNotes}`},
+            { time: "2:0:0", note: `${melProg[1]}${octaveNotes}`},
+            { time: "4:0:0", note: `${melProg[2]}${octaveNotes}`},
+            { time: "6:0:0", note: `${melProg[3]}${octaveNotes}`}
+        ]
+        var bassBranching5 = [
+            { time: "0:0:0", note: `${melProg[0]}${octaveNotes}`},
+            { time: "2:0:0", note: `${melProg[1]}${octaveNotes}`},
+            { time: "4:0:0", note: `${melProg[2]}${octaveNotes}`},
+            { time: "6:0:0", note: `${melProg[3]}${octaveNotes}`}
+        ]
+    }
+   
+
+    var notes64 = new Array(64).fill(genNotes[0]);
+
+    var notes64c = new Array(64).fill(0);
+
+    var noteDistrib = [
+        R.random_int(1, 16),
+        R.random_int(1, 16),
+        R.random_int(1, 16),
+        R.random_int(1, 16),
+        R.random_int(1, 16),
+        R.random_int(1, 16)
+    ];
+
+    var noteDistrib2 = [
+        R.random_int(1, 6),
+        R.random_int(2, 6),
+        R.random_int(3, 6),
+        R.random_int(4, 6),
+        R.random_int(5, 10),
+        R.random_int(6, 16)
+    ];
+
+    function write01Notes64() {
+        const tempNotes64 = new Array(64).fill(null);
+        const tempNotes64c = new Array(64).fill(null);
+
+        for (let i = 0; i < 6; i++) {
+            for (let j = 0; j < 64; j++) {
+                if (j * i < 64) {
+                    tempNotes64[j * i] = genNotes[i];
+                    tempNotes64c[j * i] = shuffleDecoder.indexOf(i);
+                }
+            }
+        }
+
+        let offsetWR1 = R.random_int(0, 63); // Random number between 1 and 63
+
+        for (let i = 0; i < 64; i++) {
+            notes64[(i + offsetWR1) % 64] = tempNotes64[i];
+            notes64c[(i + offsetWR1) % 64] = tempNotes64c[i];
+        }
+    }
+
+    function write02Notes64() {
+        const tempNotes64 = new Array(64).fill(null);
+        const tempNotes64c = new Array(64).fill(null);
+
+        for (let i = 1; i < 7; i++) {
+            for (let j = 0; j < 64; j++) {
+                if (j * i < 64) {
+                    tempNotes64[j * i] = genNotes[i - 1];
+                    tempNotes64c[j * i] = shuffleDecoder.indexOf(i - 1);
+                }
+            }
+        }
+
+        let offsetWR2 = R.random_int(0, 63);  // Random number between 1 and 63
+
+        for (let i = 0; i < 64; i++) {
+            notes64[(i + offsetWR2) % 64] = tempNotes64[i];
+            notes64c[(i + offsetWR2) % 64] = tempNotes64c[i];
+        }
+    }
+
+
+
+    var startPhrase = R.random_int(5,6);
+    var startPhrase2 = 2 ** R.random_int(3,6);
+    var nextPhrase1 = R.random_int(1,4) * 8;
+
+    var offset = [
+        R.random_int(0, 3),
+        R.random_int(0, 3),
+        R.random_int(0, 3),
+        R.random_int(0, 3),
+        R.random_int(0, 3),
+        R.random_int(0, 3)
+    ]
+
+    function write05Notes64() {
+    // long phrase split into short phrases 
+        //let bigPhrase = 2 ** (R.random_int(3,6)); // 8 to 64 length
+
+        let index = 0;
+        
+        let phrase = getPhrase(2 ** R.random_int(4, 5));
+        
+        while (index < notes64.length) {
+
+        //let phrase = getPhrase(8);
+
+                for (let i = 0; i < phrase.length && index < notes64.length; i++) {
+                    notes64[index] = phrase[i];
+                    notes64c[index] = shuffleDecoder[genNotes.indexOf(phrase[i])];
+                    index++;
+                }
+
+        }
+    };
+
+    function write03Notes64() {
+        for (let i = 0; i < 6; i++) {
+            for (let j = 6; j < 70; j++) {
+                if (j % noteDistrib2[i] === i) {  // This ensures each note from genNotes appears in a distributed manner.
+                    notes64[(j - 6)] = genNotes[i % 6];
+                    notes64c[(j - 6)] = i % 6;//shuffleDecoder.indexOf(i);
+                }
+            }
+        }
+    }
+
+    function write04Notes64() {
+    // long phrase split into short phrases 
+        //let bigPhrase = 2 ** (R.random_int(3,6)); // 8 to 64 length
+
+        let index = 0;
+        
+        let phrase = getPhrase(R.random_int(1, 3) * 4 + 4);
+
+        let offset1 = 6;
+        let offset2 = 2;
+
+        while (index < notes64.length) {
+
+        //let phrase = getPhrase(8);
+
+                for (let i = 0; i < phrase.length && index < notes64.length; i++) {
+                    notes64[index] = phrase[i];
+                    notes64c[index] = shuffleDecoder[genNotes.indexOf(phrase[i])];
+                    index++;
+                }
+                for (let j = offset1; j < (phrase.length + offset1) && index < notes64.length; j++) {
+                    notes64[index] = genNotes[(4 + genNotes.indexOf(phrase[j])) % 6];
+                    notes64c[index] = shuffleDecoder[(4 + genNotes.indexOf(phrase[j])) % 6];
+                    index++;
+                }
+                index = index - 8;
+                for (let k = offset2; k < (phrase.length + offset2) && index < notes64.length; k++) {
+                    notes64[index] = genNotes[(2 + genNotes.indexOf(phrase[k])) % 6];
+                    notes64c[index] = shuffleDecoder[(4 + genNotes.indexOf(phrase[k])) % 6];
+                    index++;
+                }
+
+        }    
+    };
+
+
+    if (inverted) {var notes64bass = generateArpBranches()};
+
+    function getPhrase(size) {
+
+        let phrase = [];
+        for (let i = 0; i < size; i++) {
+            phrase[i] = genNotes[(i + R.random_int(0, 6)) % 6];
+        }
+
+        return phrase;
+    }
+
+    if (melodySystem === 1 && !inverted) {
+        write01Notes64();
+    }
+    if (melodySystem === 2 && !inverted) {
+        write02Notes64();
+    }
+    if (melodySystem === 3 && !inverted) {
+        write03Notes64();
+    }
+    if (melodySystem === 4 && !inverted) {
+        write04Notes64();
+    }
+    if (melodySystem === 5 && !inverted) {
+        write05Notes64();
+    }
+
+
+
+
+    // Define a melody sequence
+    var melody1 = [
+        { time: "0:0:0", note: `${notes64[0]}${octaveNotes + wild8ves[0]}`},
+        { time: "0:0:1", note: `${notes64[1]}${octaveNotes + wild8ves[1]}`},
+        { time: "0:0:2", note: `${notes64[2]}${octaveNotes + wild8ves[2]}`},
+        { time: "0:0:3", note: `${notes64[3]}${octaveNotes + wild8ves[3]}`},
+        { time: "0:1:0", note: `${notes64[4]}${octaveNotes + wild8ves[4]}`},
+        { time: "0:1:1", note: `${notes64[5]}${octaveNotes + wild8ves[5]}`},
+        { time: "0:1:2", note: `${notes64[6]}${octaveNotes + wild8ves[6]}`},
+        { time: "0:1:3", note: `${notes64[7]}${octaveNotes + wild8ves[7]}`},
+        { time: "0:2:0", note: `${notes64[8]}${octaveNotes + wild8ves[8]}`},
+        { time: "0:2:1", note: `${notes64[9]}${octaveNotes + wild8ves[9]}`},
+        { time: "0:2:2", note: `${notes64[10]}${octaveNotes + wild8ves[10]}`},
+        { time: "0:2:3", note: `${notes64[11]}${octaveNotes + wild8ves[11]}`},
+        { time: "0:3:0", note: `${notes64[12]}${octaveNotes + wild8ves[12]}`},
+        { time: "0:3:1", note: `${notes64[13]}${octaveNotes + wild8ves[13]}`},
+        { time: "0:3:2", note: `${notes64[14]}${octaveNotes + wild8ves[14]}`},
+        { time: "0:3:3", note: `${notes64[15]}${octaveNotes + wild8ves[15]}`},
+        { time: "1:0:0", note: `${notes64[16]}${octaveNotes + wild8ves[0]}`},
+        { time: "1:0:1", note: `${notes64[17]}${octaveNotes + wild8ves[1]}`},
+        { time: "1:0:2", note: `${notes64[18]}${octaveNotes + wild8ves[2]}`},
+        { time: "1:0:3", note: `${notes64[19]}${octaveNotes + wild8ves[3]}`},
+        { time: "1:1:0", note: `${notes64[20]}${octaveNotes + wild8ves[4]}`},
+        { time: "1:1:1", note: `${notes64[21]}${octaveNotes + wild8ves[5]}`},
+        { time: "1:1:2", note: `${notes64[22]}${octaveNotes + wild8ves[6]}`},
+        { time: "1:1:3", note: `${notes64[23]}${octaveNotes + wild8ves[7]}`},
+        { time: "1:2:0", note: `${notes64[24]}${octaveNotes + wild8ves[8]}`},
+        { time: "1:2:1", note: `${notes64[25]}${octaveNotes + wild8ves[9]}`},
+        { time: "1:2:2", note: `${notes64[26]}${octaveNotes + wild8ves[10]}`},
+        { time: "1:2:3", note: `${notes64[27]}${octaveNotes + wild8ves[11]}`},
+        { time: "1:3:0", note: `${notes64[28]}${octaveNotes + wild8ves[12]}`},
+        { time: "1:3:1", note: `${notes64[29]}${octaveNotes + wild8ves[13]}`},
+        { time: "1:3:2", note: `${notes64[30]}${octaveNotes + wild8ves[14]}`},
+        { time: "1:3:3", note: `${notes64[31]}${octaveNotes + wild8ves[15]}`},
+        { time: "2:0:0", note: `${notes64[32]}${octaveNotes + wild8ves[0]}`},
+        { time: "2:0:1", note: `${notes64[33]}${octaveNotes + wild8ves[1]}`},
+        { time: "2:0:2", note: `${notes64[34]}${octaveNotes + wild8ves[2]}`},
+        { time: "2:0:3", note: `${notes64[35]}${octaveNotes + wild8ves[3]}`},
+        { time: "2:1:0", note: `${notes64[36]}${octaveNotes + wild8ves[4]}`},
+        { time: "2:1:1", note: `${notes64[37]}${octaveNotes + wild8ves[5]}`},
+        { time: "2:1:2", note: `${notes64[38]}${octaveNotes + wild8ves[6]}`},
+        { time: "2:1:3", note: `${notes64[39]}${octaveNotes + wild8ves[7]}`},
+        { time: "2:2:0", note: `${notes64[40]}${octaveNotes + wild8ves[8]}`},
+        { time: "2:2:1", note: `${notes64[41]}${octaveNotes + wild8ves[9]}`},
+        { time: "2:2:2", note: `${notes64[42]}${octaveNotes + wild8ves[10]}`},
+        { time: "2:2:3", note: `${notes64[43]}${octaveNotes + wild8ves[11]}`},
+        { time: "2:3:0", note: `${notes64[44]}${octaveNotes + wild8ves[12]}`},
+        { time: "2:3:1", note: `${notes64[45]}${octaveNotes + wild8ves[13]}`},
+        { time: "2:3:2", note: `${notes64[46]}${octaveNotes + wild8ves[14]}`},
+        { time: "2:3:3", note: `${notes64[47]}${octaveNotes + wild8ves[15]}`},
+        { time: "3:0:0", note: `${notes64[48]}${octaveNotes + wild8ves[0]}`},
+        { time: "3:0:1", note: `${notes64[49]}${octaveNotes + wild8ves[1]}`},
+        { time: "3:0:2", note: `${notes64[50]}${octaveNotes + wild8ves[2]}`},
+        { time: "3:0:3", note: `${notes64[51]}${octaveNotes + wild8ves[3]}`},
+        { time: "3:1:0", note: `${notes64[52]}${octaveNotes + wild8ves[4]}`},
+        { time: "3:1:1", note: `${notes64[53]}${octaveNotes + wild8ves[5]}`},
+        { time: "3:1:2", note: `${notes64[54]}${octaveNotes + wild8ves[6]}`},
+        { time: "3:1:3", note: `${notes64[55]}${octaveNotes + wild8ves[7]}`},
+        { time: "3:2:0", note: `${notes64[56]}${octaveNotes + wild8ves[8]}`},
+        { time: "3:2:1", note: `${notes64[57]}${octaveNotes + wild8ves[9]}`},
+        { time: "3:2:2", note: `${notes64[58]}${octaveNotes + wild8ves[10]}`},
+        { time: "3:2:3", note: `${notes64[59]}${octaveNotes + wild8ves[11]}`},
+        { time: "3:3:0", note: `${notes64[60]}${octaveNotes + wild8ves[12]}`},
+        { time: "3:3:1", note: `${notes64[61]}${octaveNotes + wild8ves[13]}`},
+        { time: "3:3:2", note: `${notes64[62]}${octaveNotes + wild8ves[14]}`},
+        { time: "3:3:3", note: `${notes64[63]}${octaveNotes + wild8ves[15]}`},    
+        { time: "4:0:0", note: `${notes64[0]}${octaveNotes + wild8ves[0]}`},
+        { time: "4:0:1", note: `${notes64[1]}${octaveNotes + wild8ves[1]}`},
+        { time: "4:0:2", note: `${notes64[2]}${octaveNotes + wild8ves[2]}`},
+        { time: "4:0:3", note: `${notes64[3]}${octaveNotes + wild8ves[3]}`},
+        { time: "4:1:0", note: `${notes64[4]}${octaveNotes + wild8ves[4]}`},
+        { time: "4:1:1", note: `${notes64[5]}${octaveNotes + wild8ves[5]}`},
+        { time: "4:1:2", note: `${notes64[6]}${octaveNotes + wild8ves[6]}`},
+        { time: "4:1:3", note: `${notes64[7]}${octaveNotes + wild8ves[7]}`},
+        { time: "4:2:0", note: `${notes64[8]}${octaveNotes + wild8ves[8]}`},
+        { time: "4:2:1", note: `${notes64[9]}${octaveNotes + wild8ves[9]}`},
+        { time: "4:2:2", note: `${notes64[10]}${octaveNotes + wild8ves[10]}`},
+        { time: "4:2:3", note: `${notes64[11]}${octaveNotes + wild8ves[11]}`},
+        { time: "4:3:0", note: `${notes64[12]}${octaveNotes + wild8ves[12]}`},
+        { time: "4:3:1", note: `${notes64[13]}${octaveNotes + wild8ves[13]}`},
+        { time: "4:3:2", note: `${notes64[14]}${octaveNotes + wild8ves[14]}`},
+        { time: "4:3:3", note: `${notes64[15]}${octaveNotes + wild8ves[15]}`},
+        { time: "5:0:0", note: `${notes64[16]}${octaveNotes + wild8ves[0]}`},
+        { time: "5:0:1", note: `${notes64[17]}${octaveNotes + wild8ves[1]}`},
+        { time: "5:0:2", note: `${notes64[18]}${octaveNotes + wild8ves[2]}`},
+        { time: "5:0:3", note: `${notes64[19]}${octaveNotes + wild8ves[3]}`},
+        { time: "5:1:0", note: `${notes64[20]}${octaveNotes + wild8ves[4]}`},
+        { time: "5:1:1", note: `${notes64[21]}${octaveNotes + wild8ves[5]}`},
+        { time: "5:1:2", note: `${notes64[22]}${octaveNotes + wild8ves[6]}`},
+        { time: "5:1:3", note: `${notes64[23]}${octaveNotes + wild8ves[7]}`},
+        { time: "5:2:0", note: `${notes64[24]}${octaveNotes + wild8ves[8]}`},
+        { time: "5:2:1", note: `${notes64[25]}${octaveNotes + wild8ves[9]}`},
+        { time: "5:2:2", note: `${notes64[26]}${octaveNotes + wild8ves[10]}`},
+        { time: "5:2:3", note: `${notes64[27]}${octaveNotes + wild8ves[11]}`},
+        { time: "5:3:0", note: `${notes64[28]}${octaveNotes + wild8ves[12]}`},
+        { time: "5:3:1", note: `${notes64[29]}${octaveNotes + wild8ves[13]}`},
+        { time: "5:3:2", note: `${notes64[30]}${octaveNotes + wild8ves[14]}`},
+        { time: "5:3:3", note: `${notes64[31]}${octaveNotes + wild8ves[15]}`},
+        { time: "6:0:0", note: `${notes64[32]}${octaveNotes + wild8ves[0]}`},
+        { time: "6:0:1", note: `${notes64[33]}${octaveNotes + wild8ves[1]}`},
+        { time: "6:0:2", note: `${notes64[34]}${octaveNotes + wild8ves[2]}`},
+        { time: "6:0:3", note: `${notes64[35]}${octaveNotes + wild8ves[3]}`},
+        { time: "6:1:0", note: `${notes64[36]}${octaveNotes + wild8ves[4]}`},
+        { time: "6:1:1", note: `${notes64[37]}${octaveNotes + wild8ves[5]}`},
+        { time: "6:1:2", note: `${notes64[38]}${octaveNotes + wild8ves[6]}`},
+        { time: "6:1:3", note: `${notes64[39]}${octaveNotes + wild8ves[7]}`},
+        { time: "6:2:0", note: `${notes64[40]}${octaveNotes + wild8ves[8]}`},
+        { time: "6:2:1", note: `${notes64[41]}${octaveNotes + wild8ves[9]}`},
+        { time: "6:2:2", note: `${notes64[42]}${octaveNotes + wild8ves[10]}`},
+        { time: "6:2:3", note: `${notes64[43]}${octaveNotes + wild8ves[11]}`},
+        { time: "6:3:0", note: `${notes64[44]}${octaveNotes + wild8ves[12]}`},
+        { time: "6:3:1", note: `${notes64[45]}${octaveNotes + wild8ves[13]}`},
+        { time: "6:3:2", note: `${notes64[46]}${octaveNotes + wild8ves[14]}`},
+        { time: "6:3:3", note: `${notes64[47]}${octaveNotes + wild8ves[15]}`},
+        { time: "7:0:0", note: `${notes64[48]}${octaveNotes + wild8ves[0]}`},
+        { time: "7:0:1", note: `${notes64[49]}${octaveNotes + wild8ves[1]}`},
+        { time: "7:0:2", note: `${notes64[50]}${octaveNotes + wild8ves[2]}`},
+        { time: "7:0:3", note: `${notes64[51]}${octaveNotes + wild8ves[3]}`},
+        { time: "7:1:0", note: `${notes64[52]}${octaveNotes + wild8ves[4]}`},
+        { time: "7:1:1", note: `${notes64[53]}${octaveNotes + wild8ves[5]}`},
+        { time: "7:1:2", note: `${notes64[54]}${octaveNotes + wild8ves[6]}`},
+        { time: "7:1:3", note: `${notes64[55]}${octaveNotes + wild8ves[7]}`},
+        { time: "7:2:0", note: `${notes64[56]}${octaveNotes + wild8ves[8]}`},
+        { time: "7:2:1", note: `${notes64[57]}${octaveNotes + wild8ves[9]}`},
+        { time: "7:2:2", note: `${notes64[58]}${octaveNotes + wild8ves[10]}`},
+        { time: "7:2:3", note: `${notes64[59]}${octaveNotes + wild8ves[11]}`},
+        { time: "7:3:0", note: `${notes64[60]}${octaveNotes + wild8ves[12]}`},
+        { time: "7:3:1", note: `${notes64[61]}${octaveNotes + wild8ves[13]}`},
+        { time: "7:3:2", note: `${notes64[62]}${octaveNotes + wild8ves[14]}`},
+        { time: "7:3:3", note: `${notes64[63]}${octaveNotes + wild8ves[15]}`}
+    ];
+
+
+    // question: make trait voice?
+    if (inverted) {
+        
+        if (invertBassShape === "medium") {
+            bassSynth.filterEnvelope.octaves = 3;
+            bassSynth.filterEnvelope.baseFrequency = 100 + hyperNum * 500 ;
+            bassSynth.envelope.decay = 0.2;
+            //bassSynth.envelope.sustain = 0;
+            bassSynth.envelope.release = 0.4;
+            if (doubleBass) {
+                bassSynth2.envelope.decay = 0.2;
+                //bassSynth2.envelope.sustain = 0;
+                bassSynth2.envelope.release = 0.4;
+            }
+        }
+    }
+
+    if (inverted) {
+    var melody1 = [
+        { time: "0:0:0", note: `${notes64bass[0]}${bass8ves + wild8ves[0]}`},
+        { time: "0:0:1", note: `${notes64bass[1]}${bass8ves + wild8ves[1]}`},
+        { time: "0:0:2", note: `${notes64bass[2]}${bass8ves + wild8ves[2]}`},
+        { time: "0:0:3", note: `${notes64bass[3]}${bass8ves + wild8ves[3]}`},
+        { time: "0:1:0", note: `${notes64bass[4]}${bass8ves + wild8ves[4]}`},
+        { time: "0:1:1", note: `${notes64bass[5]}${bass8ves + wild8ves[5]}`},
+        { time: "0:1:2", note: `${notes64bass[6]}${bass8ves + wild8ves[6]}`},
+        { time: "0:1:3", note: `${notes64bass[7]}${bass8ves + wild8ves[7]}`},
+        { time: "0:2:0", note: `${notes64bass[8]}${bass8ves + wild8ves[8]}`},
+        { time: "0:2:1", note: `${notes64bass[9]}${bass8ves + wild8ves[9]}`},
+        { time: "0:2:2", note: `${notes64bass[10]}${bass8ves + wild8ves[10]}`},
+        { time: "0:2:3", note: `${notes64bass[11]}${bass8ves + wild8ves[11]}`},
+        { time: "0:3:0", note: `${notes64bass[12]}${bass8ves + wild8ves[12]}`},
+        { time: "0:3:1", note: `${notes64bass[13]}${bass8ves + wild8ves[13]}`},
+        { time: "0:3:2", note: `${notes64bass[14]}${bass8ves + wild8ves[14]}`},
+        { time: "0:3:3", note: `${notes64bass[15]}${bass8ves + wild8ves[15]}`},
+        { time: "1:0:0", note: `${notes64bass[16]}${bass8ves + wild8ves[0]}`},
+        { time: "1:0:1", note: `${notes64bass[17]}${bass8ves + wild8ves[1]}`},
+        { time: "1:0:2", note: `${notes64bass[18]}${bass8ves + wild8ves[2]}`},
+        { time: "1:0:3", note: `${notes64bass[19]}${bass8ves + wild8ves[3]}`},
+        { time: "1:1:0", note: `${notes64bass[20]}${bass8ves + wild8ves[4]}`},
+        { time: "1:1:1", note: `${notes64bass[21]}${bass8ves + wild8ves[5]}`},
+        { time: "1:1:2", note: `${notes64bass[22]}${bass8ves + wild8ves[6]}`},
+        { time: "1:1:3", note: `${notes64bass[23]}${bass8ves + wild8ves[7]}`},
+        { time: "1:2:0", note: `${notes64bass[24]}${bass8ves + wild8ves[8]}`},
+        { time: "1:2:1", note: `${notes64bass[25]}${bass8ves + wild8ves[9]}`},
+        { time: "1:2:2", note: `${notes64bass[26]}${bass8ves + wild8ves[10]}`},
+        { time: "1:2:3", note: `${notes64bass[27]}${bass8ves + wild8ves[11]}`},
+        { time: "1:3:0", note: `${notes64bass[28]}${bass8ves + wild8ves[12]}`},
+        { time: "1:3:1", note: `${notes64bass[29]}${bass8ves + wild8ves[13]}`},
+        { time: "1:3:2", note: `${notes64bass[30]}${bass8ves + wild8ves[14]}`},
+        { time: "1:3:3", note: `${notes64bass[31]}${bass8ves + wild8ves[15]}`},
+        { time: "2:0:0", note: `${notes64bass[32]}${bass8ves + wild8ves[0]}`},
+        { time: "2:0:1", note: `${notes64bass[33]}${bass8ves + wild8ves[1]}`},
+        { time: "2:0:2", note: `${notes64bass[34]}${bass8ves + wild8ves[2]}`},
+        { time: "2:0:3", note: `${notes64bass[35]}${bass8ves + wild8ves[3]}`},
+        { time: "2:1:0", note: `${notes64bass[36]}${bass8ves + wild8ves[4]}`},
+        { time: "2:1:1", note: `${notes64bass[37]}${bass8ves + wild8ves[5]}`},
+        { time: "2:1:2", note: `${notes64bass[38]}${bass8ves + wild8ves[6]}`},
+        { time: "2:1:3", note: `${notes64bass[39]}${bass8ves + wild8ves[7]}`},
+        { time: "2:2:0", note: `${notes64bass[40]}${bass8ves + wild8ves[8]}`},
+        { time: "2:2:1", note: `${notes64bass[41]}${bass8ves + wild8ves[9]}`},
+        { time: "2:2:2", note: `${notes64bass[42]}${bass8ves + wild8ves[10]}`},
+        { time: "2:2:3", note: `${notes64bass[43]}${bass8ves + wild8ves[11]}`},
+        { time: "2:3:0", note: `${notes64bass[44]}${bass8ves + wild8ves[12]}`},
+        { time: "2:3:1", note: `${notes64bass[45]}${bass8ves + wild8ves[13]}`},
+        { time: "2:3:2", note: `${notes64bass[46]}${bass8ves + wild8ves[14]}`},
+        { time: "2:3:3", note: `${notes64bass[47]}${bass8ves + wild8ves[15]}`},
+        { time: "3:0:0", note: `${notes64bass[48]}${bass8ves + wild8ves[0]}`},
+        { time: "3:0:1", note: `${notes64bass[49]}${bass8ves + wild8ves[1]}`},
+        { time: "3:0:2", note: `${notes64bass[50]}${bass8ves + wild8ves[2]}`},
+        { time: "3:0:3", note: `${notes64bass[51]}${bass8ves + wild8ves[3]}`},
+        { time: "3:1:0", note: `${notes64bass[52]}${bass8ves + wild8ves[4]}`},
+        { time: "3:1:1", note: `${notes64bass[53]}${bass8ves + wild8ves[5]}`},
+        { time: "3:1:2", note: `${notes64bass[54]}${bass8ves + wild8ves[6]}`},
+        { time: "3:1:3", note: `${notes64bass[55]}${bass8ves + wild8ves[7]}`},
+        { time: "3:2:0", note: `${notes64bass[56]}${bass8ves + wild8ves[8]}`},
+        { time: "3:2:1", note: `${notes64bass[57]}${bass8ves + wild8ves[9]}`},
+        { time: "3:2:2", note: `${notes64bass[58]}${bass8ves + wild8ves[10]}`},
+        { time: "3:2:3", note: `${notes64bass[59]}${bass8ves + wild8ves[11]}`},
+        { time: "3:3:0", note: `${notes64bass[60]}${bass8ves + wild8ves[12]}`},
+        { time: "3:3:1", note: `${notes64bass[61]}${bass8ves + wild8ves[13]}`},
+        { time: "3:3:2", note: `${notes64bass[62]}${bass8ves + wild8ves[14]}`},
+        { time: "3:3:3", note: `${notes64bass[63]}${bass8ves + wild8ves[15]}`},    
+        { time: "4:0:0", note: `${notes64bass[0]}${bass8ves + wild8ves[0]}`},
+        { time: "4:0:1", note: `${notes64bass[1]}${bass8ves + wild8ves[1]}`},
+        { time: "4:0:2", note: `${notes64bass[2]}${bass8ves + wild8ves[2]}`},
+        { time: "4:0:3", note: `${notes64bass[3]}${bass8ves + wild8ves[3]}`},
+        { time: "4:1:0", note: `${notes64bass[4]}${bass8ves + wild8ves[4]}`},
+        { time: "4:1:1", note: `${notes64bass[5]}${bass8ves + wild8ves[5]}`},
+        { time: "4:1:2", note: `${notes64bass[6]}${bass8ves + wild8ves[6]}`},
+        { time: "4:1:3", note: `${notes64bass[7]}${bass8ves + wild8ves[7]}`},
+        { time: "4:2:0", note: `${notes64bass[8]}${bass8ves + wild8ves[8]}`},
+        { time: "4:2:1", note: `${notes64bass[9]}${bass8ves + wild8ves[9]}`},
+        { time: "4:2:2", note: `${notes64bass[10]}${bass8ves + wild8ves[10]}`},
+        { time: "4:2:3", note: `${notes64bass[11]}${bass8ves + wild8ves[11]}`},
+        { time: "4:3:0", note: `${notes64bass[12]}${bass8ves + wild8ves[12]}`},
+        { time: "4:3:1", note: `${notes64bass[13]}${bass8ves + wild8ves[13]}`},
+        { time: "4:3:2", note: `${notes64bass[14]}${bass8ves + wild8ves[14]}`},
+        { time: "4:3:3", note: `${notes64bass[15]}${bass8ves + wild8ves[15]}`},
+        { time: "5:0:0", note: `${notes64bass[16]}${bass8ves + wild8ves[0]}`},
+        { time: "5:0:1", note: `${notes64bass[17]}${bass8ves + wild8ves[1]}`},
+        { time: "5:0:2", note: `${notes64bass[18]}${bass8ves + wild8ves[2]}`},
+        { time: "5:0:3", note: `${notes64bass[19]}${bass8ves + wild8ves[3]}`},
+        { time: "5:1:0", note: `${notes64bass[20]}${bass8ves + wild8ves[4]}`},
+        { time: "5:1:1", note: `${notes64bass[21]}${bass8ves + wild8ves[5]}`},
+        { time: "5:1:2", note: `${notes64bass[22]}${bass8ves + wild8ves[6]}`},
+        { time: "5:1:3", note: `${notes64bass[23]}${bass8ves + wild8ves[7]}`},
+        { time: "5:2:0", note: `${notes64bass[24]}${bass8ves + wild8ves[8]}`},
+        { time: "5:2:1", note: `${notes64bass[25]}${bass8ves + wild8ves[9]}`},
+        { time: "5:2:2", note: `${notes64bass[26]}${bass8ves + wild8ves[10]}`},
+        { time: "5:2:3", note: `${notes64bass[27]}${bass8ves + wild8ves[11]}`},
+        { time: "5:3:0", note: `${notes64bass[28]}${bass8ves + wild8ves[12]}`},
+        { time: "5:3:1", note: `${notes64bass[29]}${bass8ves + wild8ves[13]}`},
+        { time: "5:3:2", note: `${notes64bass[30]}${bass8ves + wild8ves[14]}`},
+        { time: "5:3:3", note: `${notes64bass[31]}${bass8ves + wild8ves[15]}`},
+        { time: "6:0:0", note: `${notes64bass[32]}${bass8ves + wild8ves[0]}`},
+        { time: "6:0:1", note: `${notes64bass[33]}${bass8ves + wild8ves[1]}`},
+        { time: "6:0:2", note: `${notes64bass[34]}${bass8ves + wild8ves[2]}`},
+        { time: "6:0:3", note: `${notes64bass[35]}${bass8ves + wild8ves[3]}`},
+        { time: "6:1:0", note: `${notes64bass[36]}${bass8ves + wild8ves[4]}`},
+        { time: "6:1:1", note: `${notes64bass[37]}${bass8ves + wild8ves[5]}`},
+        { time: "6:1:2", note: `${notes64bass[38]}${bass8ves + wild8ves[6]}`},
+        { time: "6:1:3", note: `${notes64bass[39]}${bass8ves + wild8ves[7]}`},
+        { time: "6:2:0", note: `${notes64bass[40]}${bass8ves + wild8ves[8]}`},
+        { time: "6:2:1", note: `${notes64bass[41]}${bass8ves + wild8ves[9]}`},
+        { time: "6:2:2", note: `${notes64bass[42]}${bass8ves + wild8ves[10]}`},
+        { time: "6:2:3", note: `${notes64bass[43]}${bass8ves + wild8ves[11]}`},
+        { time: "6:3:0", note: `${notes64bass[44]}${bass8ves + wild8ves[12]}`},
+        { time: "6:3:1", note: `${notes64bass[45]}${bass8ves + wild8ves[13]}`},
+        { time: "6:3:2", note: `${notes64bass[46]}${bass8ves + wild8ves[14]}`},
+        { time: "6:3:3", note: `${notes64bass[47]}${bass8ves + wild8ves[15]}`},
+        { time: "7:0:0", note: `${notes64bass[48]}${bass8ves + wild8ves[0]}`},
+        { time: "7:0:1", note: `${notes64bass[49]}${bass8ves + wild8ves[1]}`},
+        { time: "7:0:2", note: `${notes64bass[50]}${bass8ves + wild8ves[2]}`},
+        { time: "7:0:3", note: `${notes64bass[51]}${bass8ves + wild8ves[3]}`},
+        { time: "7:1:0", note: `${notes64bass[52]}${bass8ves + wild8ves[4]}`},
+        { time: "7:1:1", note: `${notes64bass[53]}${bass8ves + wild8ves[5]}`},
+        { time: "7:1:2", note: `${notes64bass[54]}${bass8ves + wild8ves[6]}`},
+        { time: "7:1:3", note: `${notes64bass[55]}${bass8ves + wild8ves[7]}`},
+        { time: "7:2:0", note: `${notes64bass[56]}${bass8ves + wild8ves[8]}`},
+        { time: "7:2:1", note: `${notes64bass[57]}${bass8ves + wild8ves[9]}`},
+        { time: "7:2:2", note: `${notes64bass[58]}${bass8ves + wild8ves[10]}`},
+        { time: "7:2:3", note: `${notes64bass[59]}${bass8ves + wild8ves[11]}`},
+        { time: "7:3:0", note: `${notes64bass[60]}${bass8ves + wild8ves[12]}`},
+        { time: "7:3:1", note: `${notes64bass[61]}${bass8ves + wild8ves[13]}`},
+        { time: "7:3:2", note: `${notes64bass[62]}${bass8ves + wild8ves[14]}`},
+        { time: "7:3:3", note: `${notes64bass[63]}${bass8ves + wild8ves[15]}`}
+    ]
+    };
+
+const lfoHyper = new Tone.LFO({
+    frequency: 800, // Adjust as needed
+    min: -400,
+    max: 400,
+    amplitude: 1 // This determines how much the frequency will change at the peak of the LFO
+});
+
+
+
+    if (hyperMode && fuzzy) {
+        const gainNodeHyperF = new Tone.Gain()
+        if (!inverted){
+            lfoHyper.connect(gainNodeHyperF);
+            gainNodeHyperF.connect(monoSynth.frequency);
+        }
+        if (inverted){
+            lfoHyper.connect(gainNodeHyperF);
+            gainNodeHyperF.connect(bassSynth.frequency);
+        }
+        lfoHyper.start();
+    
+    }; // Assuming monoSynth is the synthesizer instance
+
+    if (inverted) {
+
+        var bassSequence = new Tone.Part(function(time, event){
+            monoSynth.triggerAttackRelease(event.note, (60 / storeTempo / 8) * 30, time);
+            if (double) {monoSynth2.triggerAttackRelease(event.note, (60 / storeTempo / 8) * 30, time)};
+        }, [bassBranching1, bassBranching2, bassBranching3, bassBranching4, bassBranching5][reharmNum]).start(0);
+        bassSequence.loopEnd = '8m';
+
+        var melodyPlayer = melody1;
+        melodyPlayer.forEach(function(note){
+            Tone.Transport.schedule(function(time){
+                bassSynth.triggerAttackRelease(note.note, "16n", time);
+                if (doubleBass) {bassSynth2.triggerAttackRelease(note.note, "16n", time)};
+            }, note.time);
+        });
+    }
+
+    if (!inverted) {
+
+        var bassSequence = new Tone.Part(function(time, event){
+            bassSynth.triggerAttackRelease(event.note, bassNoteLength, time);
+            if (doubleBass) {bassSynth2.triggerAttackRelease(event.note, bassNoteLength, time)};
+        }, [bassBranching1, bassBranching2, bassBranching3, bassBranching4, bassBranching5][reharmNum]).start(0);
+        bassSequence.loopEnd = '8m';
+
+        var melodyPlayer = melody1;
+        melodyPlayer.forEach(function(note){
+            Tone.Transport.schedule(function(time){
+                monoSynth.triggerAttackRelease(note.note, "8n", time);
+                if (double) {monoSynth2.triggerAttackRelease(note.note, "8n", time)};
+                hyperFilterEnv.triggerAttackRelease("16n", time);
+            }, note.time);
+            melody1.loopEnd = '4m';
+        });
+    }
+
+    var isPlaying = false; // Track if the music is currently playing
+            
+    document.addEventListener('click', function(event) {
+        const mouseX = event.clientX - canvas.getBoundingClientRect().left;
+        const mouseY = event.clientY - canvas.getBoundingClientRect().top;
+        if (!isPlaying) {
+            // Start the Tone.js audio context and then start the music
+            Tone.start().then(() => {
+            Tone.Transport.start();
+            isPlaying = true;
+            });
+            draw();
+        } else {
+            // Stop the music and reset the Transport position to start
+            if (mouseY > scaledHeight / 6) {
+                Tone.Transport.stop();
+                bassSynth.triggerRelease();
+                if (doubleBass) {bassSynth2.triggerRelease()}
+                monoSynth.triggerRelease();
+                if (double) {monoSynth2.triggerRelease()}
+                Tone.Transport.position = 0;
+                isPlaying = false;
+                //cancelAnimationFrame(animationId);
+                unDraw();
+            }
+        }
+    event.preventDefault(); // Prevent default action (text selection) in some browsers
+    });
+
+
+
+
+    // Create a loop
+    let loop = new Tone.Loop(time => {
+        // trigger your composition here
+        // synth.triggerAttackRelease("C4", "8n");
+    }, "4n");
+
+    // Start and stop the loop
+    loop.start(0);
+    loop.stop('8m');
+
+    // Set the transport to loop and start it
+    Tone.Transport.loop = true;
+    Tone.Transport.loopEnd = barNum;
+
+    // Step 2: Add an event listener to the document to listen for keypress events
+    //document.addEventListener('keydown', function(event) {
+    //if (event.key === 'm') { // Change 'm' to the desired key to mute/unmute the synth
+        // Step 3: Toggle the volume of the synth when the key is pressed
+    //    if (monoSynth.volume.value === -Infinity) {
+        // Unmute the synth by setting the volume back to its original value
+    //    monoSynth.volume.value = -25; // Adjust the volume level back to the original value
+    //    if (double) {monoSynth2.volume.value = -25};
+    //    } else {
+    //    // Mute the synth by setting the volume to -Infinity
+    //    monoSynth.volume.value = -Infinity;
+    //    if (double) {monoSynth2.volume.value = -Infinity};
+    //    }
+    //}
+    //})
+
+    // Step 2: Add an event listener to the document to listen for keypress events
+    document.addEventListener('keydown', function(event) {
+    if (event.key === 'b') { // Change 'm' to the desired key to mute/unmute the synth
+        // Step 3: Toggle the volume of the synth when the key is pressed
+        if (bassSynth.volume.value === -Infinity) {
+            // Unmute the synth by setting the volume back to its original value
+            bassSynth.volume.value = -10; // Adjust the volume level back to the original value
+            if (doubleBass) {bassSynth2.volume.value = -10}
+        } else {
+        // Mute the synth by setting the volume to -Infinity
+        bassSynth.volume.value = -Infinity;
+        if (doubleBass) {bassSynth2.volume.value = -Infinity}
+        }
+    }
+    })
+
+    //-------
+    //-------
+    //------- VISUALS
+    //-------
+    //-------
+    //fuzzy = false;
+
+    const allPalette = [
+        //Rectangles for bass prog
+        ["#0d72ef", "#327cef", "#548ff2", "#6096f1", "#76a4f4", "#a2c0f5", "#bacff8", "#d1e0fa"],
+        //unused
+        ["#101010", "#909090", "#303030", "#808080","#505050", "#606060", "#707070", "#808080","#909090", "#959595"],
+        //bg / fg main
+        ["#0054f6", "#1c1b1b", "#ab3030"]
+    ];
+
+    const dpr = window.devicePixelRatio || 1;
+
+    const canvas = document.createElement('canvas');
+    canvas.height = window.innerHeight * dpr; // Scale by device pixel ratio and window size
+    canvas.width = window.innerWidth * dpr; // Scale by device pixel ratio and window size
+        //if (canvas.height > canvas.width) {
+        //    canvas.height = canvas.width;
+        //}
+        //if (canvas.width > canvas.height) {
+            canvas.width = canvas.height;
+        //}
+
+    canvas.style.width = '100%'; // Stretch to fill the width of the window
+    canvas.style.height = '100%'; // Stretch to fill the height of the window
+    canvas.style.objectFit = 'contain'; // Maintain aspect ratio
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr); // Scale context by device pixel ratio
+    
+    let scaledWidth = canvas.width / dpr;
+    let scaledHeight = canvas.height / dpr;
+
+    let normVar =  0.5//scaledHeight / 2500
+    
+    // Set background color
+    ctx.fillStyle = allPalette[2][invertNum0];  // Change this value to any desired color
+    ctx.fillRect(0, 0, scaledWidth, scaledHeight);
+
+
+    let pointsShape = [50, 10, 8, 6];
+
+    const columns = 8;
+    const rows = 8;
+
+    // Define the region for the circles
+    const thirdHeight = scaledWidth / 1.5;
+
+    // Start and end points for the vertical boundary
+    const startY = thirdHeight;
+    const endY = 2 * thirdHeight;
+
+    // Calculate the width of the grid to ensure it remains square
+    const gridWidth = endY - startY;
+
+    // Centering the grid on the canvas
+    const startX = (scaledWidth - gridWidth);
+
+    // Calculate spacing between circles
+    const circleSpacing = gridWidth / columns;
+
+    
+
+    ctx.lineWidth = scaledWidth / 75;
+
+    var circleRadius = circleSpacing * 0.4;
+
+    var ringSize = scaledWidth / 250;
+
+    
+const img = new Image();
+img.src = 'https://arweave.net/WHRDQSOOnMudazgi8nECL3Qm8g4C3LVNaXmkuETnxdQ'; // Replace with the path to your image qbhtwMAUIFFYGAYxv6k78Da2Wt7WYmhaeNnXn6dD0dM'; //
+
+img.onload = function () {
+  // Loop through the grid
+  for (let i = 0; i < columns; i++) {
+    for (let j = 0; j < rows; j++) {
+      // Calculate the position for each image
+      const y = startX / 1.6 + i * circleSpacing;
+      const x = startY / 3.2 + j * circleSpacing;
+
+      // Calculate the size for each image (you can use circleRadius here)
+      const imageSize = circleRadius * 2 * ((notes64c[i * 8 + j] + 1) / 6);
+
+      // Draw the image
+      ctx.drawImage(
+        img,
+        x - imageSize / 2,
+        y - imageSize / 2,
+        imageSize,
+        imageSize
+      );
+
+      // Modify other elements as needed
+      // ...
+    }
+  }
+};
+
+
+    roundRectRadius = map(bassOSC2, 0, 3, 1, 2.25) * scaledHeight / 350;//bassOSC2 / 2 ;
+
+    function roundedRect(x, y, width, height, divider) {
+        ctx.beginPath();
+        ctx.moveTo(x, y + roundRectRadius / divider);
+        ctx.lineTo(x, y + height - roundRectRadius / divider);
+        ctx.arcTo(x, y + height, x + roundRectRadius / divider, y + height, roundRectRadius / divider);
+        ctx.lineTo(x + width - roundRectRadius / divider, y + height);
+        ctx.arcTo(x + width, y + height, x + width, y + height - roundRectRadius / divider, roundRectRadius / divider);
+        ctx.lineTo(x + width, y + roundRectRadius / divider);
+        ctx.arcTo(x + width, y, x + width - roundRectRadius / divider, y, roundRectRadius / divider);
+        ctx.lineTo(x + roundRectRadius / divider, y);
+        ctx.arcTo(x, y, x, y + roundRectRadius / divider, roundRectRadius / divider);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    function roundedRect1(x, y, width, height, divider) {
+        ctx.beginPath();
+        ctx.moveTo(x, y + 3 / divider);
+        ctx.lineTo(x, y + height - 3 / divider);
+        ctx.arcTo(x, y + height, x + 3 / divider, y + height, 3 / divider);
+        ctx.lineTo(x + width - 3 / divider, y + height);
+        ctx.arcTo(x + width, y + height, x + width, y + height - 3 / divider, 3 / divider);
+        ctx.lineTo(x + width, y + 3 / divider);
+        ctx.arcTo(x + width, y, x + width - 3 / divider, y, 3 / divider);
+        ctx.lineTo(x + 3 / divider, y);
+        ctx.arcTo(x, y, x, y + 3 / divider, 3 / divider);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    //const canvasWidth = canvas.width;
+    //const canvasHeight = canvas.height;
+
+    const rectangleBuffer = scaledHeight / 4;
+    const rectangleWidth = scaledWidth / 64;
+    let rectangleHeight = scaledHeight / 8;
+    const sideBuffer = 0; // scaledWidth / 512;
+
+    const rectHeightMod = [
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [0.75, 1.25, 0.75, 1.25, 0.75, 1.25, 0.75, 1.25],
+        [1.5, 0.5, 1.5, 0.5, 1.5, 0.5, 1, 1],
+        [1,1,1,1,1,1,1,1],
+        [2,1,1,2,1,1,1,1]
+    ];
+
+    if (inverted) {reharmNum = 0}
+
+    let cumulativeHeight = 0; // This variable will keep track of the total height of rectangles drawn so far
+
+    let chordCount = 8;
+    let longRect = 1;
+    if (reharmNum === 0) {chordCount = 4; longRect = 2};
+    if (reharmNum === 4) {chordCount = 6};
+
+    for (let i = 0; i < chordCount; i++) {
+        let modifiedRectangleHeight = rectangleHeight * rectHeightMod[reharmNum][i];
+        //if (inverted) {modifiedRectangleHeight = rectangleHeight * rectHeightMod[3][i]};
+        
+        ctx.fillStyle = allPalette[0][progressionRoman2[i]];
+        if (inverted) {ctx.fillStyle = allPalette[0][scaleNotes.indexOf(melProg[i])]};
+        //if (barNum === '4m') {ctx.fillStyle = allPalette[0][progressionRoman[i % 4]]};
+        
+        if (i < chordCount / 2) {
+            roundedRect1(sideBuffer, cumulativeHeight + rectangleBuffer, rectangleWidth, modifiedRectangleHeight * longRect, 1);
+            if (doubleBass && !inverted || double && inverted) {
+                roundedRect(sideBuffer + 1.08 * rectangleWidth, cumulativeHeight + rectangleBuffer, rectangleWidth / 3, modifiedRectangleHeight * longRect, 2);
+            }
+        } else if (barNum === "8m") {
+            if (i === chordCount / 2) {cumulativeHeight = 0};
+            roundedRect1(scaledWidth - rectangleWidth - sideBuffer, cumulativeHeight + rectangleBuffer, rectangleWidth, modifiedRectangleHeight * longRect, 1);
+            if (doubleBass && !inverted || double && inverted) {
+                roundedRect(scaledWidth - rectangleWidth / 3 - rectangleWidth * 1.08, cumulativeHeight + rectangleBuffer, rectangleWidth / 3, modifiedRectangleHeight * longRect, 2);
+            }
+        }
+        
+        cumulativeHeight += modifiedRectangleHeight * longRect; // After drawing the rectangle, add its height to the running total
+    }
+
+
+
+    function map(n, start1, stop1, start2, stop2) {
+        return ((n-start1)/(stop1-start1))*(stop2-start2)+start2;
+    };
+
+    
+
+    function drawGrittyCircle(ctx, x, y, radius) {
+        let points;
+        let variance = normVar;
+        let adjustedRadius = radius //- (Math.sqrt(points/50));;
+        
+
+        if (fuzzy) {
+            variance = normVar * 32 * fuzzyCount / 2 ;
+            points = pointsShape[fuzzyCount - 1] * 200 //* superFuzzNum; // This assumes that pointsShape[melOSC] is the default granularity
+            if (double && !inverted || doubleBass && inverted) {adjustedRadius = radius * 0.75};
+        } 
+        if (!fuzzy) {
+            points = pointsShape[melOSC];
+        }
+        
+        let normRad = adjustedRadius / 50
+
+        ctx.beginPath();
+
+        for (let i = 0; i < points; i++) {
+            const angle = (i / points) * 2 * Math.PI;
+            const perfectX = x + adjustedRadius * Math.cos(angle);
+            const perfectY = y + adjustedRadius * Math.sin(angle);
+            const randomX = perfectX + (R.random_dec() - 0.5) * normRad * variance //* fuzzyCount ** 3//2 //scaledHeight / 340;
+            const randomY = perfectY + (R.random_dec() - 0.5) * normRad * variance //* fuzzyCount ** 3//2 //caledHeight / 340;
+
+            if (i === 0) {
+                ctx.moveTo(randomX, randomY);
+            } else {
+                ctx.lineTo(randomX, randomY);
+            }
+        }
+
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    //function drawGrittyCircleOutline2(ctx, osc, x, y, radius) {
+
+    function drawGrittyCircleOutline(ctx, osc, x, y, radius) {
+        let points;
+        let variance = normVar;
+        let adjustedRadius = radius
+        let normRad = 1
+
+        if (fuzzy) {
+            variance = normVar * 80 * fuzzyCount;
+            points = 800 / fuzzyCount;//pointsShape[fuzzyCount - 1] * 200 
+            //adjustedRadius = radius * 0.86
+            normRad = adjustedRadius / 400 / fuzzyCount;
+        } 
+        if (!fuzzy) {
+            points = pointsShape[osc];
+        }
+
+        let lastRandomX, lastRandomY;
+
+        ctx.beginPath();
+
+        for (let i = 0; i < points; i++) {
+            const angle = (i / points) * 2 * Math.PI;
+            const perfectX = x + adjustedRadius * Math.cos(angle)
+            const perfectY = y + adjustedRadius * Math.sin(angle)
+            const randomX = perfectX + (R.random_dec() - 0.5) * variance * normRad //* fuzzyCount ** 3
+            const randomY = perfectY + (R.random_dec() - 0.5) * variance * normRad //* fuzzyCount ** 3
+
+            if (i === 0) {
+                ctx.moveTo(randomX, randomY);
+            } else {
+                if (!fuzzy) {ctx.lineTo(randomX, randomY)};
+                if (fuzzy) {ctx.quadraticCurveTo(lastRandomX, lastRandomY, (randomX + lastRandomX) / 2, (randomY + lastRandomY) / 2)};
+            }
+            
+            lastRandomX = randomX;
+            lastRandomY = randomY;
+        }
+
+        ctx.closePath();
+        ctx.stroke();
+    }
+
+
+
+
+    function drawNestedSquares(ctx, canvas) {
+
+        const sideLength = scaledHeight / 100; 
+        const totalSide = sideLength * 3; 
+
+        // Start drawing at bottom center of the canvas
+        const startX = (scaledWidth / 2) - sideLength;
+        const startY = scaledHeight - totalSide - (scaledHeight / 16); // we'll place it in the bottom 1/16th of the canvas
+
+        let distanceSq = 0.5;
+        if (spaceSize === "close") {distanceSq = 0};
+        if (spaceSize === "far") {distanceSq = 1};
+
+        ctx.strokeStyle = allPalette[2][invertNum1];
+        if (hyperMode) {ctx.fillStyle = "#ab3030"};
+
+
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(startX + 0 * sideLength, startY + 0 * sideLength, sideLength, sideLength);
+        ctx.fillRect(startX + 0 * sideLength, startY + 1 * sideLength, sideLength, sideLength);
+        ctx.fillRect(startX + 1 * sideLength, startY + 0 * sideLength, sideLength, sideLength);
+        ctx.fillRect(startX + 1 * sideLength, startY + 1 * sideLength, sideLength, sideLength);
+        ctx.fillRect(startX, startY - sideLength - distanceSq * sideLength, sideLength * 2, sideLength); // top rectangle
+        ctx.fillRect(startX, startY + 2 * sideLength + distanceSq * sideLength, sideLength * 2, sideLength); // bottom rectangle
+        ctx.fillRect(startX - sideLength - distanceSq * sideLength, startY, sideLength, sideLength * 2); // left rectangle
+        ctx.fillRect(startX + 2 * sideLength + distanceSq * sideLength, startY, sideLength, sideLength * 2); // right rectangle
+        ctx.fillRect(startX - sideLength - distanceSq * sideLength, startY - sideLength - distanceSq * sideLength, sideLength, sideLength); // top-left square
+        ctx.fillRect(startX + 2 * sideLength + distanceSq * sideLength, startY - sideLength - distanceSq * sideLength, sideLength, sideLength); // top-right square
+        ctx.fillRect(startX - sideLength - distanceSq * sideLength, startY + 2 * sideLength + distanceSq * sideLength, sideLength, sideLength); // bottom-left square
+        ctx.fillRect(startX + 2 * sideLength + distanceSq * sideLength, startY + 2 * sideLength + distanceSq * sideLength, sideLength, sideLength); // bottom-right square
+        
+        ctx.fillStyle = '#000000' //allPalette[2][invertNum1];
+        if (keyChooser === 0) {ctx.fillRect(startX + 0 * sideLength, startY + 0 * sideLength, sideLength, sideLength)};
+        if (keyChooser === 1) {ctx.fillRect(startX + 0 * sideLength, startY + 1 * sideLength, sideLength, sideLength)};
+        if (keyChooser === 2) {ctx.fillRect(startX + 1 * sideLength, startY + 0 * sideLength, sideLength, sideLength)};
+        if (keyChooser === 3) {ctx.fillRect(startX + 1 * sideLength, startY + 1 * sideLength, sideLength, sideLength)};
+        if (keyChooser === 4) {ctx.fillRect(startX, startY - sideLength - distanceSq * sideLength, sideLength * 2, sideLength)}; // top rectangle
+        if (keyChooser === 5) {ctx.fillRect(startX, startY + 2 * sideLength + distanceSq * sideLength, sideLength * 2, sideLength)}; // bottom rectangle
+        if (keyChooser === 6) {ctx.fillRect(startX - sideLength - distanceSq * sideLength, startY, sideLength, sideLength * 2)}; // left rectangle
+        if (keyChooser === 7) {ctx.fillRect(startX + 2 * sideLength + distanceSq * sideLength, startY, sideLength, sideLength * 2)}; // right rectangle
+        if (keyChooser === 8) {ctx.fillRect(startX - sideLength - distanceSq * sideLength, startY - sideLength - distanceSq * sideLength, sideLength, sideLength)}; // top-left square
+        if (keyChooser === 9) {ctx.fillRect(startX + 2 * sideLength + distanceSq * sideLength, startY - sideLength - distanceSq * sideLength, sideLength, sideLength)}; // top-right square
+        if (keyChooser === 10) {ctx.fillRect(startX - sideLength - distanceSq * sideLength, startY + 2 * sideLength + distanceSq * sideLength, sideLength, sideLength)}; // bottom-left square
+        if (keyChooser === 11) {ctx.fillRect(startX + 2 * sideLength + distanceSq * sideLength, startY + 2 * sideLength + distanceSq * sideLength, sideLength, sideLength)}; // bottom-right square
+
+        ctx.strokeRect(startX + 0 * sideLength, startY + 0 * sideLength, sideLength, sideLength);
+        ctx.strokeRect(startX + 0 * sideLength, startY + 1 * sideLength, sideLength, sideLength);
+        ctx.strokeRect(startX + 1 * sideLength, startY + 0 * sideLength, sideLength, sideLength);
+        ctx.strokeRect(startX + 1 * sideLength, startY + 1 * sideLength, sideLength, sideLength);
+        ctx.strokeRect(startX, startY - sideLength - distanceSq * sideLength, sideLength * 2, sideLength); // top rectangle
+        ctx.strokeRect(startX, startY + 2 * sideLength + distanceSq * sideLength, sideLength * 2, sideLength); // bottom rectangle
+        ctx.strokeRect(startX - sideLength - distanceSq * sideLength, startY, sideLength, sideLength * 2); // left rectangle
+        ctx.strokeRect(startX + 2 * sideLength + distanceSq * sideLength, startY, sideLength, sideLength * 2); // right rectangle
+        ctx.strokeRect(startX - sideLength - distanceSq * sideLength, startY - sideLength - distanceSq * sideLength, sideLength, sideLength); // top-left square
+        ctx.strokeRect(startX + 2 * sideLength + distanceSq * sideLength, startY - sideLength - distanceSq * sideLength, sideLength, sideLength); // top-right square
+        ctx.strokeRect(startX - sideLength - distanceSq * sideLength, startY + 2 * sideLength + distanceSq * sideLength, sideLength, sideLength); // bottom-left square
+        ctx.strokeRect(startX + 2 * sideLength + distanceSq * sideLength, startY + 2 * sideLength + distanceSq * sideLength, sideLength, sideLength); // bottom-right square
+
+    }
+
+
+    ctx.lineWidth = scaledWidth / 600;
+    drawNestedSquares(ctx, canvas);
+
+
+    // Convert Hex to RGB
+    function hexToRgb(hex) {
+        // Remove the hash at the start if it's there
+        hex = hex.replace(/^#/, '');
+
+        // Parse r, g, b values
+        let bigint = parseInt(hex, 16);
+        let r = (bigint >> 16) & 255;
+        let g = (bigint >> 8) & 255;
+        let b = bigint & 255;
+
+        return [r, g, b];
+    }
+
+    // Get RGBA color
+    function getColorWithAlpha(hex, alpha) {
+        const [r, g, b] = hexToRgb(hex);
+        return `rgba(${r},${g},${b},${alpha})`;
+    }
+
+    let isFKeyPressed = false;
+    let isTKeyPressed = false;
+    let isAKeyPressed = false;
+    let isDKeyPressed = false;
+    let isSKeyPressed = false;
+    let isRKeyPressed = false;
+    let isZKeyPressed = false;
+    let isXKeyPressed = false;
+    let isCKeyPressed = false;
+    let isVKeyPressed = false;
+    let isWKeyPressed = false;
+    let isEKeyPressed = false;
+    let isMKeyPressed = false;
+    let isGKeyPressed = false;
+    let isQKeyPressed = false;
+    let isUKeyPressed = false;
+    let isIKeyPressed = false;
+    let isHKeyPressed = false;
+    let isJKeyPressed = false;
+    let isKKeyPressed = false;
+
+    // Check if F key is pressed
+    window.addEventListener('keydown', (event) => {
+        if (event.key === 'f' || event.key === 'F') {
+            isFKeyPressed = true;
+        }
+        if (event.key === 't' || event.key === 'T') {
+            isTKeyPressed = true;
+        }
+        if (event.key === 'a' || event.key === 'A') {
+            isAKeyPressed = true;
+        }
+        if (event.key === 'd' || event.key === 'D') {
+            isDKeyPressed = true;
+        }
+        if (event.key === 's' || event.key === 'S') {
+            isSKeyPressed = true;
+        }
+        if (event.key === 'r' || event.key === 'R') {
+            isRKeyPressed = true;
+        }
+        if (event.key === 'z' || event.key === 'Z') {
+            isZKeyPressed = true;
+        }
+        if (event.key === 'x' || event.key === 'X') {
+            isXKeyPressed = true;
+        }
+        if (event.key === 'c' || event.key === 'C') {
+            isCKeyPressed = true;
+        }
+        if (event.key === 'v' || event.key === 'V') {
+            isVKeyPressed = true;
+        }   
+        if (event.key === 'w' || event.key === 'W') {
+            isWKeyPressed = true;
+        }
+        if (event.key === 'e' || event.key === 'E') {
+            isEKeyPressed = true;
+        }
+        if (event.key === 'm' || event.key === 'M') {
+            isMKeyPressed = true;
+        }   
+        if (event.key === 'g' || event.key === 'G') {
+            isGKeyPressed = true;
+        }    
+        if (event.key === 'q' || event.key === 'Q') {
+            isQKeyPressed = true;
+        }     
+        if (event.key === 'u' || event.key === 'U') {
+            isUKeyPressed = true;
+        }    
+        if (event.key === 'i' || event.key === 'I') {
+            isIKeyPressed = true;
+        } 
+        if (event.key === 'h' || event.key === 'H') {
+            isHKeyPressed = true;
+        }
+        if (event.key === 'j' || event.key === 'J') {
+            isJKeyPressed = true;
+        } 
+        if (event.key === 'k' || event.key === 'K') {
+            isKKeyPressed = true;
+        }
+    });
+
+    // Check if F key is released
+    window.addEventListener('keyup', (event) => {
+        if (event.key === 'f' || event.key === 'F') {
+            isFKeyPressed = false;
+        }
+        if (event.key === 't' || event.key === 'T') {
+            isTKeyPressed = false;
+        }
+        if (event.key === 'a' || event.key === 'A') {
+            isAKeyPressed = false;
+        }
+        if (event.key === 'd' || event.key === 'D') {
+            isDKeyPressed = false;
+        }
+        if (event.key === 's' || event.key === 'S') {
+            isSKeyPressed = false;
+        }
+        if (event.key === 'r' || event.key === 'R') {
+            isRKeyPressed = false;
+        }
+        if (event.key === 'z' || event.key === 'Z') {
+            isZKeyPressed = false;
+        }
+        if (event.key === 'x' || event.key === 'X') {
+            isXKeyPressed = false;
+        }
+        if (event.key === 'c' || event.key === 'C') {
+            isCKeyPressed = false;
+        }
+        if (event.key === 'v' || event.key === 'V') {
+            isVKeyPressed = false;
+        } 
+        if (event.key === 'w' || event.key === 'W') {
+            isWKeyPressed = false;
+        }
+        if (event.key === 'e' || event.key === 'E') {
+            isEKeyPressed = false;
+        }
+        if (event.key === 'm' || event.key === 'M') {
+            isMKeyPressed = false;
+        }
+        if (event.key === 'g' || event.key === 'G') {
+            isGKeyPressed = false;
+        }
+        if (event.key === 'q' || event.key === 'Q') {
+            isQKeyPressed = false;
+        }
+        if (event.key === 'u' || event.key === 'U') {
+            isUKeyPressed = false;
+        }
+        if (event.key === 'i' || event.key === 'I') {
+            isIKeyPressed = false;
+        }
+        if (event.key === 'h' || event.key === 'H') {
+            isHKeyPressed = false;
+        }
+        if (event.key === 'j' || event.key === 'J') {
+            isJKeyPressed = false;
+        }
+        if (event.key === 'k' || event.key === 'K') {
+            isKKeyPressed = false;
+        }
+    });
+
+
+    let isCapsLockOn = false;
+
+    document.addEventListener('keydown', (event) => {
+        if (event.getModifierState('CapsLock')) {
+            isCapsLockOn = true;
+        }
+    });
+
+    document.addEventListener('keyup', (event) => {
+        if (!event.getModifierState('CapsLock')) {
+            isCapsLockOn = false;
+        }
+    });
+
+    canvas.addEventListener('mousemove', (event) => {
+        const mouseX = event.clientX - canvas.getBoundingClientRect().left;
+        const mouseY = event.clientY - canvas.getBoundingClientRect().top;
+
+        //let rect = canvas.getBoundingClientRect();
+        //let x = event.clientX - rect.left;
+        //let y = event.clientY - rect.top;
+        if (isTKeyPressed) {
+            let newTempo = map(mouseX, 0, scaledWidth, 20, 520);
+            Tone.Transport.bpm.value = newTempo;
+            // Adjust delay time relative to BPM
+            const delayTimeInSecs = (60 / Tone.Transport.bpm.value) * 0.5; // 8n is half a beat.
+            feedbackDelayMel1.delayTime.value = delayTimeInSecs;
+        }    
+        if (isAKeyPressed) {
+            monoSynth.filterEnvelope.attack = map(mouseX, 0, scaledWidth, 0, 0.2);
+            if (double) {monoSynth2.filterEnvelope.attack = map(mouseX, 0, scaledWidth, 0, 0.2)}
+            
+            //attackPoint.y = map(mouseY, 0, scaledHeight, scaledHeight * 5/6, scaledHeight * 1/6)
+            //ddrawADSR(ctx);
+        }
+        if (isQKeyPressed) {
+            bassSynth.filterEnvelope.attack = map(mouseX, 0, scaledWidth, 0, 0.2);
+            if (double) {bassSynth2.filterEnvelope.attack = map(mouseX, 0, scaledWidth, 0, 0.2);}
+        }
+        if (isDKeyPressed) {
+            monoSynth.filterEnvelope.decay = map(mouseX, 0, scaledWidth, 0, 1);
+            if (double) {monoSynth2.filterEnvelope.decay = map(mouseX, 0, scaledWidth, 0, 1);}
+        }
+        if (isEKeyPressed) {
+            bassSynth.filterEnvelope.decay = map(mouseX, 0, scaledWidth, 0, 1);
+            if (double) {bassSynth2.filterEnvelope.decay = map(mouseX, 0, scaledWidth, 0, 1);}
+        }
+        if (isSKeyPressed) {   
+            monoSynth.filterEnvelope.sustain = map(mouseX, 0, scaledWidth, 0, 1);
+            if (double) {monoSynth2.filterEnvelope.sustain = map(mouseX, 0, scaledWidth, 0, 1)};
+        }
+        if (isWKeyPressed) {
+            bassSynth.filterEnvelope.sustain = map(mouseX, 0, scaledWidth, 0, 1);
+            if (double) {bassSynth2.filterEnvelope.sustain = map(mouseX, 0, scaledWidth, 0, 1)};
+        }
+        if (isFKeyPressed) {
+            monoSynth.filterEnvelope.release = map(mouseX, 0, scaledWidth, 0, 1);
+            if (double) {monoSynth2.filterEnvelope.release = map(mouseX, 0, scaledWidth, 0, 1)};
+        }
+        if (isRKeyPressed) {
+            bassSynth.filterEnvelope.release = map(mouseX, 0, scaledWidth, 0, 1);
+            if (double) {bassSynth2.filterEnvelope.release = map(mouseX, 0, scaledWidth, 0, 1)};
+        }
+
+        if (isGKeyPressed) {
+            let freq = map(mouseX, 0, scaledWidth / 2, 0, 1000);
+            if (hyperMode) {
+                filterMel1.Q.value = map(mouseY, scaledHeight, 0, 0, 5);
+                filterMel1.frequency.value = map(mouseX, 0, scaledWidth / 2, 0, 5000);
+            }
+            monoSynth.filterEnvelope.baseFrequency = freq;
+            if (double) {monoSynth2.filterEnvelope.baseFrequency = freq};
+            monoSynth.filterEnvelope.octaves = map(mouseY, scaledHeight, 0, 0, 10);
+            if (double) {monoSynth2.filterEnvelope.octaves = map(mouseY, scaledHeight, 0, 0, 10)};
+            if (hyperMode) {
+                filterMel1.frequency.value = freq;
+            }
+        }
+
+        if (isHKeyPressed) {
+            let freq2 = map(mouseX, 0, scaledWidth / 2, 0, 1000);
+            bassSynth.filterEnvelope.baseFrequency = freq2;
+            if (double) {bassSynth2.filterEnvelope.baseFrequency = freq2};
+            bassSynth.filterEnvelope.octaves = map(mouseY, scaledHeight, 0, 0, 10);
+            if (doubleBass) {bassSynth2.filterEnvelope.octaves = map(mouseY, scaledHeight, 0, 0, 10)};
+        }
+
+        if (isZKeyPressed) {
+            monoSynth.detune.value = 100 * Math.floor(map(mouseY, scaledHeight, 0, -12, 12));
+            if (double) {monoSynth2.detune.value = 100 * Math.floor(map(mouseY, scaledHeight, 0, -12, 12))};
+            bassSynth.detune.value = 100 * Math.floor(map(mouseY, scaledHeight, 0, -12, 12));
+            if (doubleBass) {bassSynth2.detune.value = 100 * Math.floor(map(mouseY, scaledHeight, 0, -12, 12))};         
+        }
+
+        if (isXKeyPressed) {
+            if (double) {monoSynth2.detune.value = 100 * Math.floor(map(mouseY, scaledHeight, 0, -12, 12))};
+        }
+
+        if (isCKeyPressed) {
+            distorto.wet.value = map(mouseX, 0, scaledWidth, 0, 1);
+            distorto.distortion = map(mouseY, scaledHeight, 0, 0, 1);
+        }
+
+        if (isUKeyPressed) {
+            feedbackDelayBass.wet.value = map(mouseY, scaledHeight, 0, 0, 1);
+            if (isMKeyPressed) {
+                feedbackDelayBass.delayTime = map(mouseX, 0, scaledWidth, 0, 1);
+            }
+        }
+        if (isJKeyPressed) {
+            feedbackDelayMel1.wet.value = map(mouseY, scaledHeight, 0, 0, 1);
+            if (isMKeyPressed) {
+                feedbackDelayMel1.delayTime = map(mouseX, 0, scaledWidth, 0, 1);
+            }
+        }
+        if (isIKeyPressed) {
+            reverbBass.wet.value = map(mouseY, scaledWidth, 0, 0, 1);
+            if (isMKeyPressed) {
+                reverbBass.decay = map(mouseX, 0, scaledHeight, 0, 5.0);
+            }
+        }
+        if (isKKeyPressed) {
+            reverbMel1.wet.value = map(mouseY, scaledWidth, 0, 0, 1);
+            if (isMKeyPressed) {
+                reverbMel1.decay = map(mouseX, 0, scaledHeight, 0, 5.0);
+            }
+        }
+        if (isVKeyPressed) {
+            monoSynth.volume.value = map(mouseX, 0, scaledWidth, -50, -15);
+            if (double) {monoSynth2.volume.value = map(mouseX, 0, scaledWidth, -50, -15)};
+            bassSynth.volume.value = map(mouseY, scaledWidth, 0, -50, -5);
+            if (doubleBass) {bassSynth2.volume.value = map(mouseY, scaledWidth, 0, -50, -5)};
+        }
+    });
+
+    function adjustFrequencyByCents(originalFrequency, cents) {
+        return originalFrequency * Math.pow(2, cents / 1200);
+    }
+    
+    function drawLineCircle(numLines) {
+        const cx = scaledWidth / 2;
+        const cy = scaledHeight / 1.09;
+        const r = scaledHeight / 16;  // Length of each line
+
+            // Calculate angle increment based on the number of lines
+        const angleIncrement = 360 / numLines;
+
+        // Draw lines
+        for (let i = 0; i < numLines; i++) {
+            const angle = (Math.PI / 180) * (i * angleIncrement);  // Convert angle to radians
+
+            const x = cx + r * Math.cos(angle);
+            const y = cy + r * Math.sin(angle);
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+    }
+
+    const analyser = new Tone.Analyser("waveform", 256);
+    distorto.connect(analyser);
+    reverbBass.connect(analyser);
+
+    function draw() {
+    
+        const waveform = analyser.getValue();
+        const waveformHeight = scaledHeight / 16; // Or any height you desire
+        const yOffset = scaledHeight * 121/128 - waveformHeight; // Position it at the bottom
+        const xStart = scaledWidth / 10;
+        const xEnd = scaledWidth / 32 * 12;
+        const waveWidth = xEnd - xStart;
+
+        ctx.fillStyle = allPalette[2][invertNum0]; // Adjust the alpha value for stronger/weaker fade
+            if (!isPlaying) {ctx.fillStyle = "rgba(0, 0, 0, 0)"}
+        ctx.fillRect(xStart * 0.98, yOffset * .98, waveWidth * 1.02, waveformHeight * 1.5);
+
+        ctx.beginPath();
+        ctx.strokeStyle =allPalette[2][invertNum1];
+            if (!isPlaying) {ctx.strokeStyle = `rgba(0, 0, 0, 0)`}
+        ctx.lineWidth = scaledHeight / 400;
+        
+        
+
+        for (let i = 0; i < waveform.length; i++) {
+            const x = (i / waveform.length) * waveWidth;
+            const y = (waveform[i] / 2 + 0.5) * waveformHeight + yOffset;
+            if (i === 0) {
+                ctx.moveTo(x + xStart, y);
+            } else {
+                ctx.lineTo(x + xStart, y);
+            }
+        }
+
+        //requestAnimationFrame(draw);
+        ctx.stroke();
+        requestAnimationFrame(draw);
+            // Continue your drawing or animation loop
+            //animationId = requestAnimationFrame(draw);
+        //}
+            //drawNoise();
+        if (!isPlaying) {
+            noLoop();
+        }
+    }
+
+    
+    function unDraw() {
+        const waveformHeight = scaledHeight / 16; // Or any height you desire
+        const yOffset = scaledHeight * 121/128 - waveformHeight; // Position it at the bottom
+        const xStart = scaledWidth / 32;
+        const xEnd = scaledWidth / 32 * 14;
+        const waveWidth = xEnd - xStart;
+
+        ctx.fillStyle = allPalette[2][invertNum0]; // Adjust the alpha value for stronger/weaker fade
+        ctx.fillRect(xStart, yOffset, waveWidth, waveformHeight);
+
+        //drawNoise(xStart, xEnd, yOffset, yOffset + waveformHeight)
+    }
+    
+
+    //
+    //NOISE
+    //
+    
+    function drawNoise(x1, x2, y1, y2) {
+        w = scaledHeight / 1600;
+        for (i = x1; i < x2; i += scaledHeight / 575) {
+            for (j = y1; j < y2; j += scaledHeight / 575) {
+                n = R.random_dec();
+                
+                ctx.fillStyle =  "rgba(0, 0, 0, 0.08)";
+                
+                if (n > 0.5) {
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
+                }
+                //if (n > 0.3) {
+                //	ctx.fillStyle = "rgba(125, 125, 125, 0.04)";
+                //}
+                ctx.fillRect(i, j, w, w);
+            }
+        } 
+    }
+
+    drawNoise(0, scaledHeight, 0, scaledWidth)
+
+
+let attackPoint = { x: 50, y: 200 };
+let decayPoint = { x: 150, y: 100 };
+let sustainPoint = { x: 250, y: 100 };
+let releasePoint = { x: 350, y: 300 };
+
+function drawADSR(ctx) {
+    /*ctx.strokeStyle = ['rgba(0, 0, 0, 0.6)', 'rgba(255, 255, 255, 0.6)'][invertNum0]
+    ctx.beginPath();
+    ctx.moveTo(0, 300);  // Starting point at bottom-left
+    ctx.lineTo(attackPoint.x, attackPoint.y);  // Attack
+    ctx.lineTo(decayPoint.x, decayPoint.y);  // Decay
+    ctx.lineTo(sustainPoint.x, sustainPoint.y);  // Sustain level (horizontal line)
+    ctx.lineTo(releasePoint.x, releasePoint.y);  // Release
+    ctx.stroke();*/
+}
+
+//drawADSR(ctx);
+//ctx.font = '24px Arial'; // This sets the font size to 24 pixels and the font type to Arial.
+//    ctx.fillStyle = 'black';
+//    ctx.fillText(keyOf, 50, 50); </script>

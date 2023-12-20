@@ -5,11 +5,9 @@ import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, sepolia, WagmiConfig } from "wagmi";
 import {
   mainnet,
-  polygon,
   optimism,
   base,
   zora,
-  polygonMumbai,
   optimismGoerli,
   baseGoerli,
   zoraTestnet,
@@ -20,7 +18,6 @@ import { publicProvider } from "wagmi/providers/public";
 const isTestnet = process.env.NEXT_PUBLIC_TESTNET;
 const finalChains = [
   isTestnet ? sepolia : mainnet,
-  isTestnet ? polygonMumbai : polygon,
   isTestnet ? optimismGoerli : optimism,
   isTestnet ? baseGoerli : base,
   isTestnet ? zoraTestnet : zora,

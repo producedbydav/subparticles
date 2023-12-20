@@ -1,18 +1,60 @@
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { useCreate1155Contract, useEthersSigner } from "onchain-magic";
+import { Interface } from "ethers";
+import {
+  Create1155ContractArgs,
+  store,
+  useCreate1155Contract,
+  useEthersSigner,
+} from "onchain-magic";
+import { useAccount, useNetwork } from "wagmi";
+import dropAbi from "../../lib/abi/Zora1155Drop.json";
+import { useDeploy } from "@/providers/DeployContext";
+import getFixedPriceSaleStrategy from "@/lib/zora/getFixedPriceSalesStrategy";
+import getSalesConfig from "@/lib/zora/getSalesConfig";
 
 const DeployButton = () => {
   const signer = useEthersSigner();
   const { deploy } = useCreate1155Contract();
   const { openConnectModal } = useConnectModal();
+  const { address } = useAccount();
+  const { cover } = useDeploy();
+  const { chain } = useNetwork();
 
   const handleClick = async () => {
     if (!signer) {
       openConnectModal?.();
       return;
     }
-    const response = await deploy();
-    console.log("SWEETS RESPONSE", response);
+    const name = "SUBPARTICLES";
+    const description = "CC0 ARTWORK built by dav & sweets";
+    const ipfs = await store(cover, name, description, address as string);
+    const saleStrategy = getFixedPriceSaleStrategy(chain?.id as number);
+    const minterPermissionArgs = [0, saleStrategy, 4];
+    const data = getSalesConfig(1, address as string);
+    const callSaleArgs = [1, saleStrategy, data];
+    const maxUint256 = BigInt(
+      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    );
+    const setupNewTokenArgs = [`ipfs://${ipfs}`, maxUint256];
+    const calls = [
+      new Interface(dropAbi).encodeFunctionData(
+        "addPermission",
+        minterPermissionArgs
+      ),
+      new Interface(dropAbi).encodeFunctionData(
+        "setupNewToken",
+        setupNewTokenArgs
+      ),
+      new Interface(dropAbi).encodeFunctionData("callSale", callSaleArgs),
+    ];
+    const setupActions = calls;
+
+    const args = {
+      name,
+      description,
+      setupActions,
+    } as Create1155ContractArgs;
+    const response = await deploy(args);
   };
 
   return (

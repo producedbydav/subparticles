@@ -34,15 +34,18 @@ const DeployButton = () => {
     }
     const name = "SUBPARTICLES";
     const description = "CC0 ARTWORK built by dav & sweets";
-    const ipfs = await store(cover, name, description, address as string);
+    const ipfs = await uploadToIpfs(cover);
+    console.log("SWEETS IPFS", ipfs);
     const newIpfs = await uploadToIpfs(
       createJsonBlob({
-        image:
-          "ipfs://bafybeieoqx6e6oxrnk5femqvyysqspnqxeo6ghh2ydtogacigwp3f5gbai",
+        image: `ipfs://${ipfs}`,
         name: "SUBPARTICLES",
         description: "CC0 ARTWORK built by dav & sweets",
-        animation_url:
-          "ipfs://bafybeic5l5mf43miinpycgoxb6avnu3cn7aqzw4r2o4j3rubfaw62vygpi",
+        animation_url: `ipfs://bafybeih7kt7rrbwlc7kzdgmyz5gzamjp6jybma5ios2npcyvfihiftuzuu?img=https://nftstorage.link/ipfs/${ipfs}`,
+        content: {
+          mime: "application/zip",
+          uri: `ipfs://bafybeih7kt7rrbwlc7kzdgmyz5gzamjp6jybma5ios2npcyvfihiftuzuu?img=https://nftstorage.link/ipfs/${ipfs}`,
+        },
       })
     );
     console.log("SWEETS newIpfs", newIpfs);

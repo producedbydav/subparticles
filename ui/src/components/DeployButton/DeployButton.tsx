@@ -3,6 +3,7 @@ import { Interface } from "ethers";
 import {
   Create1155ContractArgs,
   store,
+  uploadToIpfs,
   useCreate1155Contract,
   useEthersSigner,
 } from "onchain-magic";
@@ -20,6 +21,12 @@ const DeployButton = () => {
   const { cover } = useDeploy();
   const { chain } = useNetwork();
 
+  const createJsonBlob = (obj: any) => {
+    const jsonString = JSON.stringify(obj);
+
+    return new Blob([jsonString], { type: "application/json" });
+  };
+
   const handleClick = async () => {
     if (!signer) {
       openConnectModal?.();
@@ -28,6 +35,17 @@ const DeployButton = () => {
     const name = "SUBPARTICLES";
     const description = "CC0 ARTWORK built by dav & sweets";
     const ipfs = await store(cover, name, description, address as string);
+    const newIpfs = await uploadToIpfs(
+      createJsonBlob({
+        image:
+          "ipfs://bafybeieoqx6e6oxrnk5femqvyysqspnqxeo6ghh2ydtogacigwp3f5gbai",
+        name: "SUBPARTICLES",
+        description: "CC0 ARTWORK built by dav & sweets",
+        animation_url:
+          "ipfs://bafybeic5l5mf43miinpycgoxb6avnu3cn7aqzw4r2o4j3rubfaw62vygpi",
+      })
+    );
+    console.log("SWEETS newIpfs", newIpfs);
     const saleStrategy = getFixedPriceSaleStrategy(chain?.id as number);
     const minterPermissionArgs = [0, saleStrategy, 4];
     const data = getSalesConfig(1, address as string);
@@ -35,7 +53,7 @@ const DeployButton = () => {
     const maxUint256 = BigInt(
       "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
     );
-    const setupNewTokenArgs = [`ipfs://${ipfs}`, maxUint256];
+    const setupNewTokenArgs = [`ipfs://${newIpfs}`, maxUint256];
     const calls = [
       new Interface(dropAbi).encodeFunctionData(
         "addPermission",

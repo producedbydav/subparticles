@@ -3,6 +3,7 @@ import { Interface } from "ethers";
 import {
   Create1155ContractArgs,
   store,
+  uploadToIpfs,
   useCreate1155Contract,
   useEthersSigner,
 } from "onchain-magic";
@@ -20,6 +21,12 @@ const DeployButton = () => {
   const { cover } = useDeploy();
   const { chain } = useNetwork();
 
+  const createJsonBlob = (obj: any) => {
+    const jsonString = JSON.stringify(obj);
+
+    return new Blob([jsonString], { type: "application/json" });
+  };
+
   const handleClick = async () => {
     if (!signer) {
       openConnectModal?.();
@@ -27,7 +34,21 @@ const DeployButton = () => {
     }
     const name = "SUBPARTICLES";
     const description = "CC0 ARTWORK built by dav & sweets";
-    const ipfs = await store(cover, name, description, address as string);
+    const ipfs = await uploadToIpfs(cover);
+    console.log("SWEETS IPFS", ipfs);
+    const newIpfs = await uploadToIpfs(
+      createJsonBlob({
+        image: `ipfs://${ipfs}`,
+        name: "SUBPARTICLES",
+        description: "CC0 ARTWORK built by dav & sweets",
+        animation_url: `ipfs://bafybeih7kt7rrbwlc7kzdgmyz5gzamjp6jybma5ios2npcyvfihiftuzuu?img=https://nftstorage.link/ipfs/${ipfs}`,
+        content: {
+          mime: "application/zip",
+          uri: `ipfs://bafybeih7kt7rrbwlc7kzdgmyz5gzamjp6jybma5ios2npcyvfihiftuzuu?img=https://nftstorage.link/ipfs/${ipfs}`,
+        },
+      })
+    );
+    console.log("SWEETS newIpfs", newIpfs);
     const saleStrategy = getFixedPriceSaleStrategy(chain?.id as number);
     const minterPermissionArgs = [0, saleStrategy, 4];
     const data = getSalesConfig(1, address as string);
@@ -35,7 +56,7 @@ const DeployButton = () => {
     const maxUint256 = BigInt(
       "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
     );
-    const setupNewTokenArgs = [`ipfs://${ipfs}`, maxUint256];
+    const setupNewTokenArgs = [`ipfs://${newIpfs}`, maxUint256];
     const calls = [
       new Interface(dropAbi).encodeFunctionData(
         "addPermission",

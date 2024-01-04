@@ -29,7 +29,7 @@ const getSalesConfig = (tokenId: number, fundsRecipient: string) => {
     saleStart: "0", // replace with your value
     saleEnd: maxUint64, // replace with your value
     maxTokensPerAddress: maxUint64, // replace with your value
-    pricePerToken: "777000000000000", // replace with your value in ether
+    pricePerToken: "0", // replace with your value in ether
     fundsRecipient, // replace with your value
   };
 
